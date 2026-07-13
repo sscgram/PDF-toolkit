@@ -1,44 +1,157 @@
-# SSCGRAM PDF Toolkit — 100% Client-Side Dashboard
+<div align="center">
 
-A powerful, high-performance, visual, offline-first dashboard tool for managing PDF operations and image conversions completely within the security boundary of the web browser. No data ever leaves the local environment or travels to any server.
+# 📄 SSCGRAM PDF Toolkit
 
-## 🛠️ Repository File Architecture
+**A 100% client-side PDF toolkit — runs entirely in your browser.**
+No uploads. No backend. No tracking. Just open the page and go.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-ffd35a.svg)](LICENSE)
+[![Made with JavaScript](https://img.shields.io/badge/Made%20with-JavaScript-f7df1e.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![100% Client Side](https://img.shields.io/badge/Runs-100%25%20in--browser-6fe3d6.svg)](#)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-79e08a.svg)](https://github.com/sscgram/PDF-toolkit/pulls)
+[![GitHub Pages](https://img.shields.io/badge/Live-Demo-ff7ec8.svg)](https://sscgram.github.io/PDF-toolkit/)
+
+[Live Demo](https://sscgram.github.io/PDF-toolkit/) · [Report a Bug](https://github.com/sscgram/PDF-toolkit/issues) · [Request a Feature](https://github.com/sscgram/PDF-toolkit/issues)
+
+</div>
+
+---
+
+## 📚 Table of Contents
+
+- [Why this exists](#-why-this-exists)
+- [Modules](#-modules)
+- [Live Demo](#-live-demo)
+- [Quick Start](#-quick-start)
+- [Deploy to GitHub Pages](#-deploy-to-github-pages)
+- [Project Structure](#-project-structure)
+- [Privacy Model](#-privacy-model)
+- [Tech Stack](#-tech-stack)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## 💡 Why this exists
+
+Most "free PDF tool" websites quietly upload your files to a server first. This one doesn't have a server. Every conversion — image-to-PDF, split, merge, rotate, export — runs inside the browser tab using Canvas, `pdf.js`, and `jsPDF`. Close the tab and nothing you touched ever left your machine.
+
+---
+
+## 🧩 Modules
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 📄 `image-to-pdf.html`
+Turn JPG, PNG, JPEG or WEBP images into a clean PDF.
+
+- Auto-corrects EXIF rotation from phone cameras
+- Custom page size & orientation
+- Headers, footers, and page titles
+- Text or image watermarks with adjustable opacity
+
+**[→ Open module](image-to-pdf.html)**
+
+</td>
+<td width="50%" valign="top">
+
+### ⚡ `split-merge-pdftoimage.html`
+Split, merge, reorder, and export PDF pages.
+
+- Drag-and-drop page reordering
+- Rotate any page in 90° steps
+- Split by custom ranges — e.g. `1-4, 7, 11-15`
+- Export selected pages back to images, zipped
+
+**[→ Launch toolkit](split-merge-pdftoimage.html)**
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🚀 Live Demo
+
+**[pdf-toolkit.sscgram.com](https://pdf-toolkit.sscgram.com/)**
+
+No install, no signup — open the link and start converting.
+
+---
+
+## ⚙️ Quick Start
+
+Run it locally in three lines:
+
+```bash
+git clone https://github.com/sscgram/PDF-toolkit.git
+cd PDF-toolkit
+open index.html          # or use VS Code's "Live Server" extension
+```
+
+That's it — no `npm install`, no build step, no dependencies to fetch.
+
+---
+
+## 📦 Deploy to GitHub Pages
+
+1. Go to **Settings → Pages → Build and deployment** and set the source to **GitHub Actions**.
+2. Push your changes to `main`.
+3. `.github/workflows/static.yml` picks it up automatically and publishes the site.
+
+Your toolkit will be live at `https://<your-username>.github.io/<repo-name>/` within about a minute.
+
+---
+
+## 🗂️ Project Structure
 
 ```
 .
-├── .github/workflows/static.yml   # Optimized production deployment workflow for GitHub Pages
-├── LICENSE                        # Open-source MIT License terms
-├── README.md                      # Complete installation, configuration, & functional guide
-├── image-to-pdf.html              # Functional application module: Image asset to custom PDF compilation
-├── split-merge-pdftoimage.html   # Functional application module: Dynamic Split, Merge, Canvas control tool
-└── index.html                     # Stylish central entry landing panel dashboard with integrated user docs
+├── .github/
+│   └── workflows/
+│       └── static.yml               # GitHub Pages deployment workflow
+├── LICENSE                          # MIT License
+├── README.md                        # You are here
+├── image-to-pdf.html                # Image → PDF module
+├── split-merge-pdftoimage.html      # Split · Merge · Export module
+└── index.html                       # Landing page & docs
 ```
 
-## ✨ Core Application Features
+---
 
-### 1. Image to PDF Module
-* **Formats Supported:** High fidelity processing across JPG, JPEG, PNG, and modern compressed WEBP image containers.
-* **Auto-Correction Architecture:** Reads local standard EXIF tags on runtime image inputs to eliminate camera capture landscape/portrait displacement errors entirely inside the target generation viewport.
-* **Advanced Additions:** Layered styling rendering support for dynamically placed Headers, Footers, dynamic page titles, and opacity-controlled secure Watermarks (supports text parameters and graphic image stamps).
+## 🔒 Privacy Model
 
-### 2. Advanced Toolkit Module
-* **Lazy Load Engine:** Built utilizing asynchronous workers capable of rendering individual component previews for complex, large files layout structures seamlessly without blocking the primary main execution thread.
-* **Granular Control Canvas:** Precise page removal mechanisms, multi-axis 90-degree adjustments parameters, and visual drag-and-drop structural sorting interfaces.
-* **Multi-Format Splits:** Syntax parse execution handling compound multi-tier splits configurations simultaneously (e.g., custom numeric bounds mapping structures like `1-4, 7, 11-15`) packed efficiently into download bundles.
-* **High Resolution Extraction:** Rapid background processing converting structural components layout structures back down to isolated target graphic frame files structured as compressed ZIP archive assets.
+| | |
+|---|---|
+| **Server involved** | None |
+| **Files uploaded** | Never |
+| **Works offline** | Yes, after the first load |
+| **Data collected** | None |
 
-## Live Demo
-https://sscgram.github.io/PDF-toolkit/
+Everything runs in the browser's sandbox using the Canvas API. There's nothing to send, so there's nothing to intercept.
 
-## 🔒 Complete Data Privacy Architecture
-* **Zero Host Handshakes:** No server-side runtime, zero database tracking layer pipelines. All operations execute uniquely inside sandbox runtime boundaries.
-* **Air-Gap Compatible:** The entire platform operates autonomously without an active network uplink layer. Once the initial components resolve onto the host device environment, internet connection limits do not impair performance blocks.
+---
 
-## 🚀 Deployment Instructions for GitHub Pages
-This architecture is structured cleanly for standard native compilation workflows using custom continuous deployment pipelines:
-1. Initialize the framework as a standard target layout engine structure inside a GitHub remote directory environment.
-2. Ensure repository settings authorize deployment inputs securely via Actions workflows (**Repository Settings → Pages → Build and Deployment → Source set to GitHub Actions**).
-3. Commit updates to the deployment pipeline base branch (`main`). The automated continuous integration runner file configured at `.github/workflows/static.yml` intercepts runtime checks automatically to publish standard changes smoothly onto live environments.
+## 🛠️ Tech Stack
 
-## 📄 License Compliance
-Distributed freely under standard open-source parameters protected fully via the **MIT License**.
+`HTML5` · `CSS3` · `JavaScript (ES6)` · `PDF.js` · `jsPDF` · `Canvas API` · `GitHub Actions`
+
+---
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome. If you're fixing a bug, a short description of how to reproduce it helps a lot. If you're proposing a feature, open an issue first so we can talk through the approach.
+
+---
+
+## 📄 License
+
+Released under the **[MIT License](LICENSE)** — free to use, modify, and distribute.
+
+<div align="center">
+
+Made with ❤️ using HTML5, JavaScript, PDF.js & jsPDF · v1.0.0
+
+</div>
