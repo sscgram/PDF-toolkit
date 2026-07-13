@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSCGRAM.COM — PDF Toolkit | Split · Merge · Edit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --bg: #E7E9E1;
+      --bg-soft: #DFE2D8;
+      --panel: #FFFFFF;
+      --ink: #1E2A22;
+      --muted: #647063;
+      --line: #C9CFC0;
+      --line-soft: #D9DECD;
+      --accent: #2B5C4B;
+      --accent-dark: #183D31;
+      --accent-soft: #E1EAE4;
+      --stamp: #B23A2E;
+      --stamp-soft: #F4E4DF;
+      --radius: 10px;
+      --font-display: 'Fraunces', serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(30, 42, 34, 0.06) 1px, transparent 0);
+      background-size: 22px 22px;
+      color: var(--ink);
+      font-family: var(--font-body);
+      height: 100%;
+      overflow: hidden;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    ::selection {
+      background: var(--stamp-soft);
+    }
+
+    /* thin themed scrollbars for the independent scroll columns */
+    .sidebar-scroll,
+    .workspace-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: var(--line) transparent;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar,
+    .workspace-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb,
+    .workspace-scroll::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 999px;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb:hover,
+    .workspace-scroll::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-track,
+    .workspace-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    /* ---------- App shell ---------- */
+    .app {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 20px 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 4px 22px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .stamp-mark {
+      width: 56px;
+      height: 56px;
+      flex-shrink: 0;
+      transform: rotate(-7deg);
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 22px;
+      margin: 0;
+      letter-spacing: .2px;
+      color: var(--accent-dark);
+    }
+
+    .brand-text p {
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: .15s;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background: var(--accent-dark);
+      border-color: var(--accent-dark);
+      color: #fff;
+    }
+
+    .btn.stamp {
+      background: var(--stamp);
+      border-color: var(--stamp);
+      color: #fff;
+    }
+
+    .btn.stamp:hover {
+      background: #93291f;
+      border-color: #93291f;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--muted);
+      padding: 8px 10px;
+    }
+
+    .btn.ghost:hover {
+      color: var(--stamp);
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn.sm {
+      padding: 6px 12px;
+      font-size: 12.5px;
+    }
+
+    .btn.block {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* ---------- Layout ---------- */
+    .layout {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .sidebar-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 2px 6px 24px 2px;
+    }
+
+    .workspace-scroll {
+      height: 100%;
+      overflow-y: auto;
+      padding: 2px 2px 24px;
+    }
+
+    @media (max-width:980px) {
+      body {
+        height: auto;
+        overflow: visible;
+      }
+
+      .app {
+        height: auto;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .sidebar-scroll,
+      .workspace-scroll {
+        height: auto;
+        overflow-y: visible;
+      }
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 16px 18px;
+    }
+
+    .panel+.panel {
+      margin-top: 16px;
+    }
+
+    .panel h2 {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 0 4px;
+      color: var(--accent-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel h2 .num {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--stamp);
+      border: 1px solid var(--stamp);
+      border-radius: 999px;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .panel .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 12px;
+      line-height: 1.5;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 1.5px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 26px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: .15s;
+      background: var(--bg-soft);
+    }
+
+    .dropzone:hover,
+    .dropzone.drag {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .dropzone svg {
+      width: 30px;
+      height: 30px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .dropzone p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .dropzone span {
+      display: block;
+      margin-top: 4px;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    input[type=file] {
+      display: none;
+    }
+
+    .file-list {
+      list-style: none;
+      margin: 12px 0 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .file-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--bg-soft);
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 12.5px;
+    }
+
+    .file-list .fname {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .file-list .fmeta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .file-list button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 2px 4px;
+    }
+
+    .file-list button:hover {
+      color: var(--stamp);
+    }
+
+    /* form fields */
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 5px;
+    }
+
+    .field .row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .field input[type=text],
+    .field input[type=number],
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: 2px solid var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .field.mono input {
+      font-family: var(--font-mono);
+    }
+
+    .checkline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+
+    .checkline input {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--accent);
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px dashed var(--line);
+      margin: 14px 0;
+    }
+
+    /* ---------- Main grid area ---------- */
+    .workspace-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .workspace-head h2 {
+      font-family: var(--font-display);
+      font-size: 17px;
+      margin: 0;
+      color: var(--accent-dark);
+    }
+
+    .workspace-head .count {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .empty-state {
+      border: 1.5px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--panel);
+    }
+
+    .empty-state .stamp-mark {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 14px;
+      opacity: .5;
+    }
+
+    .empty-state p {
+      margin: 4px 0;
+      font-size: 13.5px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 14px;
+    }
+
+    .thumb {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      user-select: none;
+      transition: box-shadow .15s, transform .15s;
+    }
+
+    .thumb.dragging {
+      opacity: .35;
+    }
+
+    .thumb:hover {
+      box-shadow: 0 4px 14px rgba(30, 42, 34, .10);
+    }
+
+    .thumb-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3/4;
+      border-radius: 6px;
+      overflow: hidden;
+      background: repeating-linear-gradient(45deg, #F1F2EC, #F1F2EC 8px, #EAEBE3 8px, #EAEBE3 16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line-soft);
+      cursor: zoom-in;
+    }
+
+    .thumb-img {
+      max-width: 92%;
+      max-height: 92%;
+      object-fit: contain;
+      transition: transform .18s;
+      display: block;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+    }
+
+    .thumb-frame .spin {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2.5px solid var(--line);
+      border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .thumb-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .thumb-controls .grp {
+      display: flex;
+      gap: 2px;
+    }
+
+    .thumb-controls button {
+      background: var(--bg-soft);
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .thumb-controls button:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+
+    .thumb-controls button.danger:hover {
+      background: var(--stamp-soft);
+      border-color: var(--stamp);
+      color: var(--stamp);
+    }
+
+    .thumb-controls .handle {
+      cursor: grab;
+      color: var(--muted);
+    }
+
+    .thumb-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--muted);
+      padding: 0 1px;
+    }
+
+    .thumb-meta .pos {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-weight: 600;
+    }
+
+    /* Zoom modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 26, 20, .72);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--panel);
+      border-radius: 14px;
+      max-width: min(920px, 94vw);
+      width: 100%;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-top .info {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-soft);
+      padding: 20px;
+      position: relative;
+    }
+
+    .modal-body canvas {
+      max-width: 100%;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .25);
+      background: #fff;
+    }
+
+    .modal-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--line);
+      flex-wrap: wrap;
+    }
+
+    .modal-bottom input[type=range] {
+      width: 140px;
+      accent-color: var(--accent);
+    }
+
+    .zoom-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      width: 46px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .nav-btn {
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      width: 34px;
+      height: 34px;
+      font-size: 16px;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent-soft);
+    }
+
+    /* Busy overlay */
+    .busy-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(231, 233, 225, .88);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .busy-overlay.open {
+      display: flex;
+    }
+
+    .busy-ring {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid var(--line);
+      border-top-color: var(--stamp);
+      animation: spin 0.9s linear infinite;
+    }
+
+    .busy-overlay p {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent-dark);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--accent-dark);
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: .25s;
+      z-index: 300;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.err {
+      background: var(--stamp);
+    }
+
+    footer.credit {
+      flex: 0 0 auto;
+      text-align: center;
+      padding: 10px 0 14px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    @media (max-width:980px) {
+      footer.credit {
+        padding-bottom: 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- Inside split-merge-pdftoimage.html: Find the <div class="topbar"> section and replace it with this to complete the link loop -->
+    <div class="topbar">
+      <div class="brand">
+        <svg class="stamp-mark" viewBox="0 0 100 100">
+          <defs>
+            <path id="circlePath" d="M 50,50 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="none" stroke="#2B5C4B" stroke-width="2" />
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#2B5C4B" stroke-width="1.4" />
+          <text font-family="JetBrains Mono, monospace" font-size="9.2" font-weight="600" fill="#2B5C4B"
+            letter-spacing="1.5">
+            <textPath href="#circlePath" startOffset="2%">SSCGRAM.COM • PDF TOOLKIT • </textPath>
+          </text>
+          <path d="M35 52 L46 63 L67 38" fill="none" stroke="#B23A2E" stroke-width="5" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+        <div class="brand-text">
+          <h1>SSCGRAM PDF Toolkit</h1>
+          <p>SPLIT · MERGE · REORDER · WATERMARK — SAB BROWSER MEIN</p>
+        </div>
+      </div>
+
+      <!-- NAVIGATION ADDED HERE -->
+      <div class="top-actions">
+        <a href="index.html" class="btn ghost">🏠 Home</a>
+        <a href="image-to-pdf.html" class="btn ghost">🖼️ Image to PDF</a>
+        <button class="btn ghost" id="resetBtn">↺ Reset all</button>
+        <button class="btn primary" id="exportAllBtn">⬇ Export / Merge</button>
+      </div>
+    </div>
+
+    <div class="layout">
+
+      <!-- ============ SIDEBAR (own scrollbar) ============ -->
+      <div class="sidebar-scroll">
+
+        <div class="panel">
+          <h2><span class="num">1</span> PDF Upload Karein</h2>
+          <p class="hint">Ek ya multiple PDF daalein — chahe kitni bhi badi ho, page-by-page lazy load hota hai, UI
+            atkega nahi.</p>
+          <div class="dropzone" id="dropzone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M12 16V4M12 4l-4 4M12 4l4 4" />
+              <path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3" />
+            </svg>
+            <p>Yahan drag-drop karein ya click karein</p>
+            <span>.pdf files • unlimited size</span>
+          </div>
+          <input type="file" id="fileInput" accept="application/pdf" multiple>
+          <ul class="file-list" id="fileList"></ul>
+        </div>
+
+        <div class="panel">
+          <h2><span class="num">2</span> Split PDF</h2>
+          <p class="hint">Neeche grid mein page ki position number se range likhein. Ek saath alag-alag ranges bhi de
+            sakte hain — sabki alag PDF ban kar ZIP mein milegi.</p>
+          <div class="field mono">
+            <label>Page numbers / ranges (e.g. 1-3,5,7-9)</label>
+            <input type="text" id="splitInput" placeholder="1-3, 5, 7-9">
+          </div>
+          <div class="row" style="display:flex;gap:8px;">
+            <button class="btn sm" id="splitBtn" style="flex:1;">✂ Split &amp; Download</button>
+            <button class="btn sm ghost" id="splitEachBtn" title="Har page ek alag PDF">Har page alag</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2><span class="num">3</span> Pages ko Images ki tarah Export Karein</h2>
+          <p class="hint">Grid mein jo bhi order abhi hai usi order mein, naam ke saath (e.g.
+            <code>001_file_p1.png</code>), ek ZIP mein milega.</p>
+          <div class="field">
+            <div class="row">
+              <div style="flex:1;">
+                <label>Format</label>
+                <select id="imgFormat">
+                  <option value="png">PNG (sharp)</option>
+                  <option value="jpeg">JPG (chhota size)</option>
+                </select>
+              </div>
+              <div style="flex:1;">
+                <label>Quality</label>
+                <select id="imgQuality">
+                  <option value="low">Low</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <button class="btn sm block" id="exportImagesBtn">🖼 Export Images (ZIP)</button>
+        </div>
+
+        <div class="panel">
+          <h2><span class="num">4</span> Header / Footer / Watermark</h2>
+          <p class="hint">Ye Export aur Split — dono outputs par lagega. Neeche diye defaults khud badal sakte hain.
+            Abhi sirf English/Latin text support hota hai.</p>
+          <div class="field">
+            <label>Header text</label>
+            <div class="row">
+              <input type="text" id="headerText" placeholder="e.g. Confidential — SSCGRAM.COM">
+              <select id="headerAlign" style="max-width:90px;">
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+            <div class="row" style="margin-top:6px;">
+              <div style="flex:1;"><label style="font-weight:500;font-size:11px;color:var(--muted);">Font size
+                  (pt)</label><input type="number" id="headerSize" value="9" min="4" max="48" step="1"></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Footer text</label>
+            <div class="row">
+              <input type="text" id="footerText" value="SSCGRAM.COM" placeholder="e.g. SSCGRAM.COM">
+              <select id="footerAlign" style="max-width:90px;">
+                <option value="left">Left</option>
+                <option value="center" selected>Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+            <div class="row" style="margin-top:6px;">
+              <div style="flex:1;"><label style="font-weight:500;font-size:11px;color:var(--muted);">Font size
+                  (pt)</label><input type="number" id="footerSize" value="9" min="4" max="48" step="1"></div>
+            </div>
+          </div>
+          <label class="checkline"><input type="checkbox" id="pageNumbers" checked> Footer mein "Page X of Y" bhi add
+            karein</label>
+          <div class="field">
+            <label>Watermark text (diagonal)</label>
+            <input type="text" id="watermarkText" value="SSCGRAM.COM" placeholder="e.g. SSCGRAM.COM">
+            <div class="row" style="margin-top:6px;">
+              <div style="flex:1;"><label style="font-weight:500;font-size:11px;color:var(--muted);">Font size
+                  (pt)</label><input type="number" id="watermarkSize" value="40" min="6" max="150" step="1"></div>
+              <div style="flex:1;"><label style="font-weight:500;font-size:11px;color:var(--muted);">Rotation
+                  (°)</label><input type="number" id="watermarkRotation" value="35" min="-180" max="180" step="1"></div>
+              <div style="flex:1;"><label
+                  style="font-weight:500;font-size:11px;color:var(--muted);">Opacity</label><input type="number"
+                  id="watermarkOpacity" value="0.15" min="0.02" max="1" step="0.01"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2><span class="num">5</span> Page Margin (white padding)</h2>
+          <p class="hint">Page content ke chaaron taraf white margin add karein (print/binding ke liye). Ye Export &amp;
+            Split — dono par lagta hai.</p>
+          <div class="field">
+            <label>Preset</label>
+            <select id="paddingPreset">
+              <option value="none" selected>None</option>
+              <option value="small">Small (~0.2in)</option>
+              <option value="medium">Medium (~0.4in)</option>
+              <option value="high">High (~0.7in)</option>
+            </select>
+          </div>
+          <div class="field mono">
+            <label>Ya custom (pt, 72pt = 1 inch) — khaali chhodein preset use karne ke liye</label>
+            <input type="number" id="paddingCustom" placeholder="e.g. 20" min="0" max="300" step="1">
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2><span class="num">6</span> Metadata</h2>
+          <p class="hint">Ye PDF properties mein save hoga (File → Properties mein dikhega).</p>
+          <div class="field"><label>Title</label><input type="text" id="metaTitle" placeholder="e.g. SSC Notes 2026">
+          </div>
+          <div class="field"><label>Author</label><input type="text" id="metaAuthor" value="sscgram"></div>
+          <div class="field"><label>Subject</label><input type="text" id="metaSubject" placeholder="optional"></div>
+          <div class="field"><label>Keywords (comma se alag)</label><input type="text" id="metaKeywords"
+              value="sscgram, SSCGRAM.COM"></div>
+          <p class="hint" style="margin-bottom:0;">Producer / Creator hamesha <strong>SSCGRAM.COM</strong> print hoga.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- ============ MAIN WORKSPACE (own scrollbar) ============ -->
+      <div class="workspace-scroll">
+        <div class="workspace-head">
+          <h2>Pages — drag karke order badlein, rotate/zoom/remove karein</h2>
+          <span class="count" id="pageCount">0 pages loaded</span>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+          <svg class="stamp-mark" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="46" fill="none" stroke="#647063" stroke-width="2" />
+            <path d="M35 52 L46 63 L67 38" fill="none" stroke="#647063" stroke-width="5" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          <p><strong>Abhi koi PDF load nahi hui.</strong></p>
+          <p>Left panel se ek ya zyada PDF upload karein — sabke pages yahan grid mein preview honge.</p>
+        </div>
+
+        <div class="grid" id="grid"></div>
+      </div>
+
+    </div>
+
+    <footer class="credit">Built for SSCGRAM.COM — 100% client-side, files kabhi kisi server par upload nahi hote.
+    </footer>
+  </div>
+
+  <!-- Zoom Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-top">
+        <span class="info" id="modalInfo">Page 1 / 1</span>
+        <button class="btn ghost sm" id="modalClose">✕ Close</button>
+      </div>
+      <div class="modal-body">
+        <button class="nav-btn" id="modalPrev" style="position:absolute;left:14px;">‹</button>
+        <canvas id="modalCanvas"></canvas>
+        <button class="nav-btn" id="modalNext" style="position:absolute;right:14px;">›</button>
+      </div>
+      <div class="modal-bottom">
+        <button class="nav-btn" id="modalRotate" title="Rotate">⟳</button>
+        <span style="width:1px;height:20px;background:var(--line);"></span>
+        <button class="nav-btn" id="zoomOut">−</button>
+        <input type="range" id="zoomSlider" min="0.5" max="3" step="0.1" value="1">
+        <button class="nav-btn" id="zoomIn">+</button>
+        <span class="zoom-label" id="zoomLabel">100%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="busy-overlay" id="busyOverlay">
+    <div class="busy-ring"></div>
+    <p id="busyText">Processing…</p>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+    /* ============== STATE ============== */
+    let sourceDocs = {};      // docId -> {name, bytes, pdfjsDoc, numPages, pdfLibDocPromise}
+    let workspace = [];        // ordered [{uid, docId, pageIndex, rotation}]
+    let docCounter = 0, uidCounter = 0;
+    let thumbCache = new Map(); // uid -> dataUrl
+    let draggedUid = null;
+    let rebuildScheduled = false;
+    let observer = null;
+
+    /* concurrency-limited thumbnail render queue */
+    let activeRenders = 0;
+    const MAX_CONCURRENT = 4;
+    const renderQueue = [];
+
+    /* zoom modal state */
+    let zoomIndex = 0;
+    let zoomLevel = 1;
+
+    /* ============== DOM refs ============== */
+    const $ = (id) => document.getElementById(id);
+    const dropzone = $('dropzone'), fileInput = $('fileInput'), fileListEl = $('fileList');
+    const grid = $('grid'), emptyState = $('emptyState'), pageCountEl = $('pageCount');
+    const busyOverlay = $('busyOverlay'), busyText = $('busyText'), toastEl = $('toast');
+    const modalOverlay = $('modalOverlay'), modalCanvas = $('modalCanvas'), modalInfo = $('modalInfo');
+
+    /* ============== UTIL ============== */
+    function toast(msg, isErr) {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast show' + (isErr ? ' err' : '');
+      clearTimeout(toastEl._t);
+      toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 3200);
+    }
+    function setBusy(on, msg) {
+      busyText.textContent = msg || 'Processing…';
+      busyOverlay.classList.toggle('open', !!on);
+    }
+    function downloadBlob(data, filename) {
+      const blob = (data instanceof Blob) ? data : new Blob([data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+    function slug(s) {
+      return (s || 'sscgram').toString().trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'sscgram';
+    }
+
+    /* ============== FILE UPLOAD ============== */
+    dropzone.addEventListener('click', () => fileInput.click());
+    ['dragenter', 'dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('drag'); }));
+    ['dragleave', 'drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('drag'); }));
+    dropzone.addEventListener('drop', e => {
+      const files = [...e.dataTransfer.files].filter(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+      if (files.length) handleFiles(files);
+    });
+    fileInput.addEventListener('change', e => {
+      if (e.target.files.length) handleFiles([...e.target.files]);
+      fileInput.value = '';
+    });
+
+    async function handleFiles(files) {
+      for (const file of files) {
+        const docId = 'd' + (docCounter++);
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const bytes = new Uint8Array(arrayBuffer);
+          sourceDocs[docId] = { name: file.name, bytes, pdfjsDoc: null, numPages: 0, pdfLibDocPromise: null };
+          updateFileList();
+
+          const loadingTask = pdfjsLib.getDocument({ data: bytes.slice() });
+          const pdfjsDoc = await loadingTask.promise;
+          sourceDocs[docId].pdfjsDoc = pdfjsDoc;
+          sourceDocs[docId].numPages = pdfjsDoc.numPages;
+
+          const newEntries = [];
+          for (let i = 0; i < pdfjsDoc.numPages; i++) {
+            newEntries.push({ uid: uidCounter++, docId, pageIndex: i, rotation: 0 });
+          }
+          await appendEntriesBatched(newEntries);
+          updateFileList();
+          toast(`${file.name} load ho gayi (${pdfjsDoc.numPages} pages)`);
+        } catch (err) {
+          console.error(err);
+          const msg = (err && err.name === 'PasswordException')
+            ? `${file.name} password-protected hai — abhi ye tool protected PDFs support nahi karta.`
+            : `${file.name} load nahi ho payi. File corrupt ho sakti hai.`;
+          toast(msg, true);
+        }
+      }
+    }
+
+    function updateFileList() {
+      fileListEl.innerHTML = '';
+      Object.entries(sourceDocs).forEach(([docId, d]) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="fname" title="${d.name}">${d.name}</span>
+      <span class="fmeta">${d.numPages || '…'}p</span>
+      <button data-doc="${docId}" title="Remove file">✕</button>`;
+        li.querySelector('button').addEventListener('click', () => removeFile(docId));
+        fileListEl.appendChild(li);
+      });
+    }
+    function removeFile(docId) {
+      workspace = workspace.filter(w => w.docId !== docId);
+      delete sourceDocs[docId];
+      updateFileList();
+      fullRebuildGrid();
+    }
+
+    /* ============== GRID: batched placeholder append (keeps UI smooth) ============== */
+    function appendEntriesBatched(entries) {
+      return new Promise(resolve => {
+        workspace.push(...entries);
+        let i = 0;
+        const BATCH = 24;
+        function step() {
+          fullRebuildGrid(); // cheap: cache-hit render, cost dominated by page count already appended
+          i += BATCH;
+          if (i < entries.length) { requestAnimationFrame(step); }
+          else resolve();
+        }
+        requestAnimationFrame(step);
+      });
+    }
+
+    function scheduleRebuild() {
+      if (rebuildScheduled) return;
+      rebuildScheduled = true;
+      requestAnimationFrame(() => { fullRebuildGrid(); rebuildScheduled = false; });
+    }
+
+    function fullRebuildGrid() {
+      emptyState.style.display = workspace.length ? 'none' : 'block';
+      grid.style.display = workspace.length ? 'grid' : 'none';
+      pageCountEl.textContent = `${workspace.length} page${workspace.length === 1 ? '' : 's'} loaded`;
+
+      const html = workspace.map((entry, idx) => {
+        const cached = thumbCache.get(entry.uid);
+        const src = cached || '';
+        const loadingAttr = cached ? '' : 'data-loading="1"';
+        const doc = sourceDocs[entry.docId];
+        return `<div class="thumb" draggable="true" data-uid="${entry.uid}">
+      <div class="thumb-frame">
+        <img class="thumb-img" data-uid="${entry.uid}" style="transform:rotate(${entry.rotation}deg); ${cached ? '' : 'display:none;'}" src="${src}" alt="page ${idx + 1}">
+        ${cached ? '' : '<div class="spin"></div>'}
+      </div>
+      <div class="thumb-controls">
+        <span class="handle" title="Drag to reorder">⠿</span>
+        <div class="grp">
+          <button data-act="rotate" title="Rotate 90°">⟳</button>
+          <button data-act="remove" class="danger" title="Remove page">✕</button>
+        </div>
+      </div>
+      <div class="thumb-meta" ${loadingAttr}>
+        <span class="pos">#${idx + 1}</span>
+        <span title="${doc ? doc.name : ''}">p.${entry.pageIndex + 1}</span>
+      </div>
+    </div>`;
+      }).join('');
+
+      grid.innerHTML = html;
+
+      if (observer) observer.disconnect();
+      observer = new IntersectionObserver((obs) => {
+        obs.forEach(en => {
+          if (en.isIntersecting) {
+            const uid = +en.target.closest('.thumb').dataset.uid;
+            queueRender(uid);
+            observer.unobserve(en.target);
+          }
+        });
+      }, { root: null, rootMargin: '300px' });
+      grid.querySelectorAll('.thumb-meta[data-loading="1"]').forEach(el => observer.observe(el));
+    }
+
+    /* ============== THUMBNAIL RENDER QUEUE ============== */
+    function queueRender(uid) {
+      if (thumbCache.has(uid)) return;
+      renderQueue.push(uid);
+      pump();
+    }
+    function pump() {
+      while (activeRenders < MAX_CONCURRENT && renderQueue.length) {
+        const uid = renderQueue.shift();
+        activeRenders++;
+        renderThumb(uid).catch(e => console.error(e)).finally(() => { activeRenders--; pump(); });
+      }
+    }
+    async function renderThumb(uid) {
+      const entry = workspace.find(w => w.uid === uid);
+      if (!entry) return;
+      const doc = sourceDocs[entry.docId];
+      if (!doc || !doc.pdfjsDoc) return;
+      const page = await doc.pdfjsDoc.getPage(entry.pageIndex + 1);
+      const base = page.getViewport({ scale: 1 });
+      const scale = 320 / base.width;
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width; canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+      thumbCache.set(uid, dataUrl);
+      const img = grid.querySelector(`.thumb-img[data-uid="${uid}"]`);
+      if (img) {
+        img.src = dataUrl; img.style.display = 'block';
+        const spin = img.parentElement.querySelector('.spin');
+        if (spin) spin.remove();
+      }
+    }
+
+    /* ============== GRID INTERACTIONS (event delegation) ============== */
+    grid.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-act]');
+      if (btn) {
+        const uid = +btn.closest('.thumb').dataset.uid;
+        if (btn.dataset.act === 'rotate') rotatePage(uid);
+        if (btn.dataset.act === 'remove') removePage(uid);
+        return;
+      }
+      const frame = e.target.closest('.thumb-frame');
+      if (frame) {
+        const uid = +frame.closest('.thumb').dataset.uid;
+        openZoom(uid);
+      }
+    });
+
+    function rotatePage(uid) {
+      const entry = workspace.find(w => w.uid === uid);
+      if (!entry) return;
+      entry.rotation = (entry.rotation + 90) % 360;
+      const img = grid.querySelector(`.thumb-img[data-uid="${uid}"]`);
+      if (img) img.style.transform = `rotate(${entry.rotation}deg)`;
+    }
+    function removePage(uid) {
+      workspace = workspace.filter(w => w.uid !== uid);
+      fullRebuildGrid();
+    }
+
+    /* drag & drop reorder */
+    grid.addEventListener('dragstart', e => {
+      const item = e.target.closest('.thumb');
+      if (!item) return;
+      draggedUid = +item.dataset.uid;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    grid.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (draggedUid == null) return;
+      const item = e.target.closest('.thumb');
+      if (!item) return;
+      const overUid = +item.dataset.uid;
+      if (overUid === draggedUid) return;
+      const fromIdx = workspace.findIndex(w => w.uid === draggedUid);
+      const toIdx = workspace.findIndex(w => w.uid === overUid);
+      if (fromIdx < 0 || toIdx < 0) return;
+      const [moved] = workspace.splice(fromIdx, 1);
+      workspace.splice(toIdx, 0, moved);
+      scheduleRebuild();
+    });
+    grid.addEventListener('dragend', () => {
+      draggedUid = null;
+      grid.querySelectorAll('.thumb.dragging').forEach(el => el.classList.remove('dragging'));
+    });
+
+    /* ============== ZOOM MODAL ============== */
+    const modalCtx = modalCanvas.getContext('2d');
+    function openZoom(uid) {
+      zoomIndex = workspace.findIndex(w => w.uid === uid);
+      zoomLevel = 1;
+      $('zoomSlider').value = 1;
+      modalOverlay.classList.add('open');
+      renderZoom();
+    }
+    $('modalClose').addEventListener('click', () => modalOverlay.classList.remove('open'));
+    modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) modalOverlay.classList.remove('open'); });
+    $('modalPrev').addEventListener('click', () => { if (zoomIndex > 0) { zoomIndex--; renderZoom(); } });
+    $('modalNext').addEventListener('click', () => { if (zoomIndex < workspace.length - 1) { zoomIndex++; renderZoom(); } });
+    $('modalRotate').addEventListener('click', () => {
+      const entry = workspace[zoomIndex];
+      entry.rotation = (entry.rotation + 90) % 360;
+      const img = grid.querySelector(`.thumb-img[data-uid="${entry.uid}"]`);
+      if (img) img.style.transform = `rotate(${entry.rotation}deg)`;
+      renderZoom();
+    });
+    $('zoomIn').addEventListener('click', () => { zoomLevel = Math.min(3, +(zoomLevel + 0.2).toFixed(1)); $('zoomSlider').value = zoomLevel; renderZoom(); });
+    $('zoomOut').addEventListener('click', () => { zoomLevel = Math.max(0.5, +(zoomLevel - 0.2).toFixed(1)); $('zoomSlider').value = zoomLevel; renderZoom(); });
+    $('zoomSlider').addEventListener('input', e => { zoomLevel = +e.target.value; renderZoom(); });
+
+    async function renderZoom() {
+      const entry = workspace[zoomIndex];
+      if (!entry) return;
+      const doc = sourceDocs[entry.docId];
+      const page = await doc.pdfjsDoc.getPage(entry.pageIndex + 1);
+      const totalRotation = (page.rotate + entry.rotation + 360) % 360;
+      const base = page.getViewport({ scale: 1, rotation: totalRotation });
+      const containerW = Math.min(window.innerWidth * 0.78, 820);
+      const fitScale = containerW / base.width;
+      const scale = Math.max(0.1, fitScale * zoomLevel);
+      const viewport = page.getViewport({ scale, rotation: totalRotation });
+      modalCanvas.width = viewport.width; modalCanvas.height = viewport.height;
+      await page.render({ canvasContext: modalCtx, viewport }).promise;
+      modalInfo.textContent = `Page ${zoomIndex + 1} / ${workspace.length}  •  ${doc.name}  •  p.${entry.pageIndex + 1}`;
+      $('zoomLabel').textContent = Math.round(zoomLevel * 100) + '%';
+    }
+
+    /* ============== EXPORT OPTIONS / METADATA ============== */
+    const PADDING_PRESETS = { none: 0, small: 14, medium: 28, high: 50 }; // points (72pt = 1in)
+
+    function collectExportOptions() {
+      const customPad = parseFloat($('paddingCustom').value);
+      const padding = (Number.isFinite(customPad) && customPad >= 0)
+        ? customPad
+        : (PADDING_PRESETS[$('paddingPreset').value] ?? 0);
+
+      return {
+        header: $('headerText').value.trim(),
+        headerAlign: $('headerAlign').value,
+        headerSize: Math.max(4, parseFloat($('headerSize').value) || 9),
+        footer: $('footerText').value.trim(),
+        footerAlign: $('footerAlign').value,
+        footerSize: Math.max(4, parseFloat($('footerSize').value) || 9),
+        pageNumbers: $('pageNumbers').checked,
+        watermark: $('watermarkText').value.trim(),
+        watermarkSize: Math.max(6, parseFloat($('watermarkSize').value) || 40),
+        watermarkRotation: parseFloat($('watermarkRotation').value) || 0,
+        watermarkOpacity: Math.min(1, Math.max(0.02, parseFloat($('watermarkOpacity').value) || 0.15)),
+        padding,
+        meta: {
+          title: $('metaTitle').value.trim(),
+          author: $('metaAuthor').value.trim() || 'sscgram',
+          subject: $('metaSubject').value.trim(),
+          keywords: $('metaKeywords').value.trim(),
+        }
+      };
+    }
+
+    async function getPdfLibDoc(docId) {
+      const d = sourceDocs[docId];
+      if (!d.pdfLibDocPromise) {
+        d.pdfLibDocPromise = PDFLib.PDFDocument.load(d.bytes, { ignoreEncryption: true });
+      }
+      return d.pdfLibDocPromise;
+    }
+
+    function drawAligned(page, text, { y, size, font, color, align, margin }) {
+      const { width } = page.getSize();
+      const tw = font.widthOfTextAtSize(text, size);
+      let x;
+      if (align === 'center') x = width / 2 - tw / 2;
+      else if (align === 'right') x = width - margin - tw;
+      else x = margin;
+      page.drawText(text, { x, y, size, font, color });
+    }
+
+    async function buildPdfFromEntries(entries, opts) {
+      const { PDFDocument, StandardFonts, rgb, degrees } = PDFLib;
+      const outDoc = await PDFDocument.create();
+      const fontRegular = await outDoc.embedFont(StandardFonts.Helvetica);
+      const fontBold = await outDoc.embedFont(StandardFonts.HelveticaBold);
+
+      const padPx = opts.padding || 0;
+
+      for (const entry of entries) {
+        const srcDoc = await getPdfLibDoc(entry.docId);
+        const [copied] = await outDoc.copyPages(srcDoc, [entry.pageIndex]);
+        const newRot = (copied.getRotation().angle + entry.rotation + 360) % 360;
+        copied.setRotation(degrees(newRot));
+
+        if (padPx > 0) {
+          // Push existing content inward and grow the (unrotated) page box equally on
+          // every side. Because /Rotate rotates the whole box as one unit, a uniform
+          // border in the box's own coordinate space stays uniform after rotation too.
+          const { width: bw, height: bh } = copied.getSize();
+          copied.translateContent(padPx, padPx);
+          copied.setSize(bw + padPx * 2, bh + padPx * 2);
+        }
+
+        outDoc.addPage(copied);
+      }
+
+      const total = outDoc.getPageCount();
+      const margin = Math.max(20, 16 + padPx * 0.4);
+      outDoc.getPages().forEach((p, idx) => {
+        const { height } = p.getSize();
+        const ink = rgb(0.14, 0.2, 0.17);
+        const stampColor = rgb(0.70, 0.16, 0.13);
+
+        if (opts.header) {
+          drawAligned(p, opts.header, { y: height - margin, size: opts.headerSize, font: fontRegular, color: ink, align: opts.headerAlign, margin });
+        }
+        let footerText = opts.footer || '';
+        if (opts.pageNumbers) {
+          footerText += (footerText ? '   •   ' : '') + `Page ${idx + 1} of ${total}`;
+        }
+        if (footerText) {
+          drawAligned(p, footerText, { y: margin / 1.7, size: opts.footerSize, font: fontRegular, color: ink, align: opts.footerAlign, margin });
+        }
+        if (opts.watermark) {
+          const size = opts.watermarkSize;
+          const tw = fontBold.widthOfTextAtSize(opts.watermark, size);
+          const { width, height: h2 } = p.getSize();
+          p.drawText(opts.watermark, {
+            x: width / 2 - tw / 2, y: h2 / 2, size, font: fontBold,
+            color: stampColor, opacity: opts.watermarkOpacity, rotate: degrees(opts.watermarkRotation)
+          });
+        }
+      });
+
+      outDoc.setTitle(opts.meta.title || 'SSCGRAM.COM Document');
+      outDoc.setAuthor(opts.meta.author || 'sscgram');
+      outDoc.setSubject(opts.meta.subject || '');
+      const kw = (opts.meta.keywords || 'sscgram, SSCGRAM.COM').split(',').map(s => s.trim()).filter(Boolean);
+      outDoc.setKeywords(kw);
+      outDoc.setProducer('SSCGRAM.COM PDF Toolkit');
+      outDoc.setCreator('SSCGRAM.COM');
+      outDoc.setCreationDate(new Date());
+      outDoc.setModificationDate(new Date());
+
+      return outDoc.save();
+    }
+
+    function friendlyError(e) {
+      if (e && e.message && /WinAnsi|encode/i.test(e.message)) {
+        return 'Header/Footer/Watermark mein abhi sirf English/Latin characters support hote hain.';
+      }
+      return 'Kuch galat ho gaya: ' + (e && e.message ? e.message : 'unknown error');
+    }
+
+    /* ============== EXPORT / MERGE ============== */
+    $('exportAllBtn').addEventListener('click', async () => {
+      if (!workspace.length) { toast('Pehle koi PDF upload karein.', true); return; }
+      setBusy(true, 'PDF export ho raha hai…');
+      try {
+        const opts = collectExportOptions();
+        const bytes = await buildPdfFromEntries(workspace, opts);
+        const name = opts.meta.title ? slug(opts.meta.title) : 'sscgram-merged';
+        downloadBlob(bytes, `${name}.pdf`);
+        toast('Download shuru ✓');
+      } catch (e) { console.error(e); toast(friendlyError(e), true); }
+      setBusy(false);
+    });
+
+    $('resetBtn').addEventListener('click', () => {
+      if (!workspace.length && !Object.keys(sourceDocs).length) { toast('Already khaali hai.'); return; }
+      sourceDocs = {}; workspace = []; thumbCache.clear();
+      updateFileList(); fullRebuildGrid();
+      toast('Sab reset ho gaya.');
+    });
+
+    /* ============== SPLIT ============== */
+    function parseRanges(raw, total) {
+      const tokens = raw.split(',').map(t => t.trim()).filter(Boolean);
+      if (!tokens.length) throw new Error('Koi valid range nahi mili.');
+      const groups = [];
+      for (const tok of tokens) {
+        if (tok.includes('-')) {
+          const [a, b] = tok.split('-').map(s => parseInt(s.trim(), 10));
+          if (!Number.isInteger(a) || !Number.isInteger(b) || a < 1 || b < a || b > total) {
+            throw new Error(`"${tok}" invalid range hai (1 - ${total} ke beech honi chahiye).`);
+          }
+          const arr = []; for (let n = a; n <= b; n++) arr.push(n);
+          groups.push(arr);
+        } else {
+          const n = parseInt(tok, 10);
+          if (!Number.isInteger(n) || n < 1 || n > total) throw new Error(`"${tok}" invalid page number hai (1 - ${total}).`);
+          groups.push([n]);
+        }
+      }
+      return groups;
+    }
+
+    async function performSplit(groups) {
+      setBusy(true, 'Split ho raha hai…');
+      try {
+        const opts = collectExportOptions();
+        if (groups.length === 1) {
+          const entries = groups[0].map(pos => workspace[pos - 1]);
+          const bytes = await buildPdfFromEntries(entries, opts);
+          const label = groups[0].length > 1 ? `p${groups[0][0]}-${groups[0][groups[0].length - 1]}` : `p${groups[0][0]}`;
+          downloadBlob(bytes, `sscgram_${label}.pdf`);
+        } else {
+          const zip = new JSZip();
+          for (let gi = 0; gi < groups.length; gi++) {
+            const entries = groups[gi].map(pos => workspace[pos - 1]);
+            const bytes = await buildPdfFromEntries(entries, opts);
+            const label = groups[gi].length > 1 ? `${groups[gi][0]}-${groups[gi][groups[gi].length - 1]}` : `${groups[gi][0]}`;
+            zip.file(`sscgram_part${gi + 1}_p${label}.pdf`, bytes);
+          }
+          const zipBlob = await zip.generateAsync({ type: 'blob' });
+          downloadBlob(zipBlob, 'sscgram_split_parts.zip');
+        }
+        toast('Split complete — download shuru ✓');
+      } catch (e) { console.error(e); toast(friendlyError(e), true); }
+      setBusy(false);
+    }
+
+    /* ============== EXPORT ALL PAGES AS IMAGES (ZIP) ============== */
+    async function exportImagesZip() {
+      if (!workspace.length) { toast('Pehle PDF upload karein.', true); return; }
+      setBusy(true, 'Pages ko image mein render kiya ja raha hai…');
+      try {
+        const format = $('imgFormat').value;               // 'png' | 'jpeg'
+        const qualityPreset = $('imgQuality').value;        // 'low' | 'medium' | 'high'
+        const scaleMap = { low: 1.2, medium: 2, high: 3.2 };
+        const scale = scaleMap[qualityPreset] || 2;
+        const mime = format === 'png' ? 'image/png' : 'image/jpeg';
+        const ext = format === 'png' ? 'png' : 'jpg';
+        const padDigits = String(workspace.length).length;
+
+        const zip = new JSZip();
+        for (let i = 0; i < workspace.length; i++) {
+          const entry = workspace[i];
+          const doc = sourceDocs[entry.docId];
+          const page = await doc.pdfjsDoc.getPage(entry.pageIndex + 1);
+          const totalRotation = (page.rotate + entry.rotation + 360) % 360;
+          const viewport = page.getViewport({ scale, rotation: totalRotation });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width; canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          if (format === 'jpeg') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          const blob = await new Promise(res => canvas.toBlob(res, mime, 0.92));
+          const order = String(i + 1).padStart(padDigits, '0');
+          const base = slug(doc.name.replace(/\.pdf$/i, ''));
+          zip.file(`${order}_${base}_p${entry.pageIndex + 1}.${ext}`, blob);
+        }
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        downloadBlob(zipBlob, 'sscgram_pages_images.zip');
+        toast('Images ZIP taiyaar — download shuru ✓');
+      } catch (e) { console.error(e); toast('Error: ' + (e && e.message ? e.message : 'unknown'), true); }
+      setBusy(false);
+    }
+    $('exportImagesBtn').addEventListener('click', exportImagesZip);
+
+    $('splitBtn').addEventListener('click', async () => {
+      if (!workspace.length) { toast('Pehle PDF upload karein.', true); return; }
+      const raw = $('splitInput').value.trim();
+      if (!raw) { toast('Range daalein, jaise 1-3,5,7-9', true); return; }
+      let groups;
+      try { groups = parseRanges(raw, workspace.length); }
+      catch (e) { toast(e.message, true); return; }
+      performSplit(groups);
+    });
+    $('splitEachBtn').addEventListener('click', () => {
+      if (!workspace.length) { toast('Pehle PDF upload karein.', true); return; }
+      const groups = workspace.map((_, i) => [i + 1]);
+      performSplit(groups);
+    });
+
+  </script>
+</body>
+
+</html>
