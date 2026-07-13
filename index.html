@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSCGRAM PDF Toolkit - All in One</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ================= GLOBAL NAVIGATION ================= */
+  body { margin: 0; padding: 0; background: #0a0a0a; overflow: hidden; }
+  .main-navbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1a1a1a;
+    padding: 12px;
+    gap: 15px;
+    border-bottom: 2px solid #333;
+    height: 60px;
+    box-sizing: border-box;
+  }
+  .main-navbar button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #2c3346;
+    color: #eef0f5;
+    transition: 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .main-navbar button:hover { background: #3d465e; }
+  .main-navbar button.active { background: #f2a93b; color: #1a1206; box-shadow: 0 4px 12px rgba(242,169,59,0.3); }
+  
+  .tool-container {
+    display: none;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+    width: 100%;
+  }
+  .tool-container.active { display: block; }
+
+  /* ================= TOOL 1 CSS (Image to PDF) ================= */
+  #tool1 {
+    --bg:#12151c;
+    --panel:#1a1f2b;
+    --panel-2:#212739;
+    --line:#2c3346;
+    --text:#eef0f5;
+    --muted:#9aa3b8;
+    --accent:#f2a93b;
+    --accent-2:#5fd0c0;
+    --danger:#e5637a;
+    --radius:10px;
+    
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Noto Sans Devanagari', system-ui, sans-serif;
+    min-height: 100%;
+
+    & * { box-sizing: border-box; }
+    & header { padding: 28px 20px 18px; text-align: center; border-bottom: 1px solid var(--line); }
+    & header .brand { font-size: 13px; letter-spacing: 2px; color: var(--accent-2); text-transform: uppercase; font-weight: 700; }
+    & header h1 { margin: 6px 0 4px; font-size: 26px; font-weight: 800; }
+    & header p { margin: 0; color: var(--muted); font-size: 14px; }
+    & .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 60px; }
+    & .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; }
+    & .drop { border: 2px dashed var(--line); border-radius: var(--radius); padding: 30px 16px; text-align: center; cursor: pointer; transition: .15s border-color, .15s background; }
+    & .drop:hover, & .drop.drag { border-color: var(--accent); background: rgba(242,169,59,0.06); }
+    & .drop .icon { font-size: 34px; display: block; margin-bottom: 8px; }
+    & .drop strong { color: var(--text); font-size: 15px; }
+    & .drop span { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; }
+    & input[type=file] { display: none; }
+    & .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 16px; margin-top: 6px; }
+    & .opt-group label.title { display: block; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    & .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    & .seg button { flex: 1; padding: 9px 6px; background: var(--panel-2); color: var(--muted); border: none; cursor: pointer; font-size: 13px; border-right: 1px solid var(--line); }
+    & .seg button:last-child { border-right: none; }
+    & .seg button.active { background: var(--accent); color: #1a1206; font-weight: 700; }
+    & #imageList { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 14px; }
+    & #imageList li { position: relative; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px; cursor: grab; text-align: center; user-select: none; }
+    & #imageList li.dragging { opacity: .4; }
+    & #imageList li img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; display: block; cursor: zoom-in; }
+    & #imageList li .zoom-hint { position: absolute; inset: 8px 8px auto 8px; top: auto; bottom: 26px; text-align: center; font-size: 10px; color: var(--muted); pointer-events: none; opacity: 0; transition: opacity .15s; }
+    & #imageList li:hover .zoom-hint { opacity: 1; }
+    & .lightbox { position: fixed; inset: 0; background: rgba(6,8,14,0.92); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 30px; }
+    & .lightbox.open { display: flex; }
+    & .lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    & .lightbox .lb-close { position: absolute; top: 20px; right: 24px; background: var(--panel-2); color: var(--text); border: 1px solid var(--line); width: 38px; height: 38px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+    & .lightbox .lb-caption { position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; color: var(--muted); font-size: 13px; }
+    & .lightbox .lb-nav { position: absolute; top: 50%; transform: translateY(-50%); background: var(--panel-2); color: var(--text); border: 1px solid var(--line); width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; }
+    & .lightbox .lb-prev { left: 20px; }
+    & .lightbox .lb-next { right: 20px; }
+    & #imageList li .num { position: absolute; top: 4px; left: 4px; background: var(--accent); color: #1a1206; font-size: 11px; font-weight: 800; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    & #imageList li .rm { position: absolute; top: 4px; right: 4px; background: var(--danger); color: #fff; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 13px; line-height: 1; }
+    & #imageList li .fname { margin-top: 6px; font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    & .empty-hint { color: var(--muted); font-size: 13px; text-align: center; padding: 10px; }
+    & .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    & .btn { padding: 12px 22px; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; }
+    & .btn-primary { background: var(--accent); color: #1a1206; }
+    & .btn-primary:disabled { background: #4a4536; color: #8a8577; cursor: not-allowed; }
+    & .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+    & .count { color: var(--muted); font-size: 13px; }
+    & .meta { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+    & .meta b { color: var(--accent-2); }
+    & footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; }
+    & .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    & .section-head h3 { margin: 0; font-size: 15px; font-weight: 800; }
+    & .subtag { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    & .switch { position: relative; width: 42px; height: 24px; display: inline-block; flex-shrink: 0; }
+    & .switch input { display: none; }
+    & .switch .slider { position: absolute; inset: 0; background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; cursor: pointer; transition: .15s; }
+    & .switch .slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: var(--muted); border-radius: 50%; transition: .15s; }
+    & .switch input:checked + .slider { background: rgba(242,169,59,0.25); border-color: var(--accent); }
+    & .switch input:checked + .slider::before { transform: translateX(18px); background: var(--accent); }
+    & .subpanel { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); display: none; }
+    & .subpanel.open { display: block; }
+    & .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 12px; }
+    & .field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+    & .field input[type=text], & .field input[type=number], & .field select { width: 100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--text); padding: 9px 10px; border-radius: 7px; font-size: 13px; }
+    & .field input[type=range] { width: 100%; accent-color: var(--accent); }
+    & .field .range-val { font-size: 11px; color: var(--accent-2); font-weight: 700; }
+    & .field-full { grid-column: 1 / -1; }
+    & .hr-divider { border: none; border-top: 1px solid var(--line); margin: 14px 0; }
+    & .mini-note { font-size: 11px; color: var(--muted); margin-top: -6px; margin-bottom: 10px; }
+    & #wmImagePreview { max-width: 120px; max-height: 80px; border-radius: 6px; border: 1px solid var(--line); display: none; margin-top: 8px; }
+    & .filename-preview { font-size: 13px; color: var(--accent-2); margin-top: 10px; word-break: break-all; }
+    & .filename-preview b { color: var(--text); }
+    & .thumb-tools { display: flex; gap: 6px; margin-top: 6px; }
+    & .rot-btn { flex: 1; background: var(--panel); border: 1px solid var(--line); color: var(--text); border-radius: 6px; padding: 5px 4px; font-size: 14px; cursor: pointer; line-height: 1; }
+    & .rot-btn:hover { border-color: var(--accent); color: var(--accent); }
+    & .rot-btn:disabled { opacity: .4; cursor: wait; }
+    & .lb-tools { position: absolute; top: 20px; left: 24px; display: flex; gap: 10px; }
+    & .lb-rotate { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); width: 38px; height: 38px; border-radius: 50%; font-size: 16px; cursor: pointer; }
+    & .lb-rotate:hover { border-color: var(--accent); color: var(--accent); }
+    & .lb-rotate:disabled { opacity: .4; cursor: wait; }
+    & .drag-handle { margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 4px; font-size: 13px; color: var(--muted); cursor: grab; touch-action: none; user-select: none; }
+    & .drag-handle:active { cursor: grabbing; color: var(--accent); border-color: var(--accent); }
+    & #imageList li.drag-over { outline: 2px dashed var(--accent); outline-offset: 2px; }
+  }
+
+  /* ================= TOOL 2 CSS (PDF Toolkit) ================= */
+  #tool2 {
+    --bg:#E7E9E1;
+    --bg-soft:#DFE2D8;
+    --panel:#FFFFFF;
+    --ink:#1E2A22;
+    --muted:#647063;
+    --line:#C9CFC0;
+    --line-soft:#D9DECD;
+    --accent:#2B5C4B;
+    --accent-dark:#183D31;
+    --accent-soft:#E1EAE4;
+    --stamp:#B23A2E;
+    --stamp-soft:#F4E4DF;
+    --radius:10px;
+    --font-display:'Fraunces',serif;
+    --font-body:'Inter',system-ui,sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+
+    background: var(--bg);
+    background-image: radial-gradient(circle at 1px 1px, rgba(30,42,34,0.06) 1px, transparent 0);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    min-height: 100%;
+    
+    & * { box-sizing: border-box; }
+    & ::selection { background: var(--stamp-soft); }
+    & a { color: inherit; }
+    & button { font-family: inherit; cursor: pointer; }
+    & .sidebar-scroll, & .workspace-scroll { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+    & .sidebar-scroll::-webkit-scrollbar, & .workspace-scroll::-webkit-scrollbar { width: 8px; }
+    & .sidebar-scroll::-webkit-scrollbar-thumb, & .workspace-scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
+    & .sidebar-scroll::-webkit-scrollbar-thumb:hover, & .workspace-scroll::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    & .app { max-width: 1400px; margin: 0 auto; padding: 20px 20px 0; height: 100%; display: flex; flex-direction: column; }
+    & .topbar { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 4px 22px; flex-wrap: wrap; }
+    & .brand { display: flex; align-items: center; gap: 14px; }
+    & .stamp-mark { width: 56px; height: 56px; flex-shrink: 0; transform: rotate(-7deg); }
+    & .brand-text h1 { font-family: var(--font-display); font-weight: 700; font-size: 22px; margin: 0; letter-spacing: .2px; color: var(--accent-dark); }
+    & .brand-text p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); font-family: var(--font-mono); }
+    & .top-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    & .btn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 9px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; transition: .15s; }
+    & .btn:hover { border-color: var(--accent); color: var(--accent-dark); }
+    & .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    & .btn.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+    & .btn.ghost { background: transparent; border-color: transparent; color: var(--muted); padding: 8px 10px; }
+    & .btn.ghost:hover { color: var(--stamp); }
+    & .btn:disabled { opacity: .45; cursor: not-allowed; pointer-events: none; }
+    & .btn.sm { padding: 6px 12px; font-size: 12.5px; }
+    & .btn.block { width: 100%; justify-content: center; }
+    & .layout { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
+    & .sidebar-scroll { height: 100%; overflow-y: auto; padding: 2px 6px 24px 2px; }
+    & .workspace-scroll { height: 100%; overflow-y: auto; padding: 2px 2px 24px; }
+    & .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 16px 18px; margin-bottom: 16px; }
+    & .panel h2 { font-family: var(--font-display); font-size: 15px; font-weight: 600; margin: 0 0 4px; color: var(--accent-dark); display: flex; align-items: center; gap: 8px; }
+    & .panel h2 .num { font-family: var(--font-mono); font-size: 10.5px; color: var(--stamp); border: 1px solid var(--stamp); border-radius: 999px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; }
+    & .panel .hint { font-size: 12px; color: var(--muted); margin: 0 0 12px; line-height: 1.5; }
+    & .dropzone { border: 1.5px dashed var(--line); border-radius: var(--radius); padding: 26px 14px; text-align: center; cursor: pointer; transition: .15s; background: var(--bg-soft); }
+    & .dropzone:hover, & .dropzone.drag { border-color: var(--accent); background: var(--accent-soft); }
+    & .dropzone svg { width: 30px; height: 30px; color: var(--accent); margin-bottom: 8px; }
+    & .dropzone p { margin: 0; font-size: 13px; color: var(--ink); font-weight: 600; }
+    & .dropzone span { display: block; margin-top: 4px; font-size: 11.5px; color: var(--muted); }
+    & input[type=file] { display: none; }
+    & .file-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    & .file-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--bg-soft); border: 1px solid var(--line-soft); border-radius: 8px; padding: 7px 10px; font-size: 12.5px; }
+    & .file-list .fname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+    & .file-list .fmeta { font-family: var(--font-mono); font-size: 11px; color: var(--muted); flex-shrink: 0; }
+    & .file-list button { background: none; border: none; color: var(--muted); font-size: 14px; padding: 2px 4px; }
+    & .file-list button:hover { color: var(--stamp); }
+    & .field { margin-bottom: 12px; }
+    & .field label { display: block; font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 5px; }
+    & .field .row { display: flex; gap: 8px; }
+    & .field input[type=text], & .field input[type=number], & .field select { width: 100%; border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; font-family: var(--font-body); font-size: 13px; background: #fff; color: var(--ink); }
+    & .field input:focus, & .field select:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+    & .field.mono input { font-family: var(--font-mono); }
+    & .checkline { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink); margin-bottom: 12px; }
+    & .workspace-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    & .workspace-head h2 { font-family: var(--font-display); font-size: 17px; margin: 0; color: var(--accent-dark); }
+    & .workspace-head .count { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+    & .empty-state { border: 1.5px dashed var(--line); border-radius: var(--radius); padding: 60px 20px; text-align: center; color: var(--muted); background: var(--panel); }
+    & .empty-state .stamp-mark { width: 64px; height: 64px; margin: 0 auto 14px; opacity: .5; }
+    & .empty-state p { margin: 4px 0; font-size: 13.5px; }
+    & .grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(150px,1fr)); gap: 14px; }
+    & .thumb { background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 8px; display: flex; flex-direction: column; gap: 6px; user-select: none; transition: box-shadow .15s, transform .15s; }
+    & .thumb.dragging { opacity: .35; }
+    & .thumb:hover { box-shadow: 0 4px 14px rgba(30,42,34,.10); }
+    & .thumb-frame { position: relative; width: 100%; aspect-ratio: 3/4; border-radius: 6px; overflow: hidden; background: repeating-linear-gradient(45deg,#F1F2EC,#F1F2EC 8px,#EAEBE3 8px,#EAEBE3 16px); display: flex; align-items: center; justify-content: center; border: 1px solid var(--line-soft); cursor: zoom-in; }
+    & .thumb-img { max-width: 92%; max-height: 92%; object-fit: contain; transition: transform .18s; display: block; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+    & .thumb-frame .spin { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid var(--line); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    & .thumb-controls { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+    & .thumb-controls .grp { display: flex; gap: 2px; }
+    & .thumb-controls button { background: var(--bg-soft); border: 1px solid var(--line-soft); border-radius: 6px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; color: var(--ink); }
+    & .thumb-controls button:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark); }
+    & .thumb-controls button.danger:hover { background: var(--stamp-soft); border-color: var(--stamp); color: var(--stamp); }
+    & .thumb-controls .handle { cursor: grab; color: var(--muted); }
+    & .thumb-meta { display: flex; align-items: center; justify-content: space-between; font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); padding: 0 1px; }
+    & .thumb-meta .pos { background: var(--accent); color: #fff; border-radius: 999px; padding: 1px 7px; font-weight: 600; }
+    & .modal-overlay { position: fixed; inset: 0; background: rgba(20,26,20,.72); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+    & .modal-overlay.open { display: flex; }
+    & .modal { background: var(--panel); border-radius: 14px; max-width: min(920px,94vw); width: 100%; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; }
+    & .modal-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    & .modal-top .info { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+    & .modal-body { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; background: var(--bg-soft); padding: 20px; position: relative; }
+    & .modal-body canvas { max-width: 100%; box-shadow: 0 6px 24px rgba(0,0,0,.25); background: #fff; }
+    & .modal-bottom { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+    & .modal-bottom input[type=range] { width: 140px; accent-color: var(--accent); }
+    & .zoom-label { font-family: var(--font-mono); font-size: 12px; width: 46px; text-align: center; color: var(--muted); }
+    & .nav-btn { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 8px; width: 34px; height: 34px; font-size: 16px; }
+    & .nav-btn:hover { background: var(--accent-soft); }
+    & .busy-overlay { position: fixed; inset: 0; background: rgba(231,233,225,.88); z-index: 200; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; }
+    & .busy-overlay.open { display: flex; }
+    & .busy-ring { width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--stamp); animation: spin 0.9s linear infinite; }
+    & .busy-overlay p { font-family: var(--font-mono); font-size: 13px; color: var(--accent-dark); }
+    & .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(12px); background: var(--accent-dark); color: #fff; padding: 11px 20px; border-radius: 999px; font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none; transition: .25s; z-index: 300; box-shadow: 0 8px 24px rgba(0,0,0,.25); display: flex; align-items: center; gap: 8px; }
+    & .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    & .toast.err { background: var(--stamp); }
+    & footer.credit { flex: 0 0 auto; text-align: center; padding: 10px 0 14px; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
+    
+    @media (max-width:980px){
+      & .layout { grid-template-columns: 1fr; height: auto; }
+      & .sidebar-scroll, & .workspace-scroll { height: auto; overflow-y: visible; }
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav class="main-navbar">
+  <button id="nav-tool1" class="active" onclick="switchTab('tool1')">Image to PDF Converter</button>
+  <button id="nav-tool2" onclick="switchTab('tool2')">Advanced PDF Toolkit</button>
+</nav>
+
+<div id="tool1" class="tool-container active">
+  <header>
+    <div class="brand">SSCGRAM.COM</div>
+    <h1>Image → PDF Converter</h1>
+    <p>Sab kuch aapke browser mein hi hota hai — koi upload nahi, koi internet zaroorat nahi.</p>
+  </header>
+  <div class="wrap">
+    <div class="card">
+      <div class="drop" id="dropZone">
+        <span class="icon">🖼️</span>
+        <strong>Images yahan drop karein ya click karke chunein</strong>
+        <span>JPG, PNG, WEBP — multiple images ek saath</span>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" multiple>
+    </div>
+    
+    <div class="card">
+      <div class="section-head"><h3>Header <span class="subtag">Optional</span></h3>
+        <label class="switch"><input type="checkbox" id="headerToggle"><span class="slider"></span></label>
+      </div>
+      <div class="subpanel" id="headerPanel">
+        <div class="field-grid">
+          <div class="field field-full"><label>Header Text</label><input type="text" id="headerText" placeholder="e.g. SSCGRAM.COM"></div>
+          <div class="field"><label>Font Size (pt)</label><input type="number" id="headerFontSize" value="12" min="6" max="60"></div>
+          <div class="field"><label>Font Style</label><select id="headerFontStyle"><option value="normal">Normal</option><option value="bold">Bold</option><option value="italic">Italic</option><option value="bolditalic">Bold Italic</option></select></div>
+          <div class="field"><label>Alignment</label><select id="headerAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></div>
+          <div class="field"><label>Top Padding (mm) <span class="range-val" id="headerPadVal">10</span></label><input type="range" id="headerPad" min="2" max="40" value="10"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="field-grid"><div class="field field-full"><label>File Name likhein</label><input type="text" id="fileTitle" placeholder="e.g. My Documents"></div></div>
+      <div class="filename-preview">PDF Title: <b id="fileNamePreview">Document convert.. by sscgram.pdf</b></div>
+    </div>
+    <div class="card">
+      <ul id="imageList"></ul>
+      <div class="empty-hint" id="emptyHint">Abhi koi image add nahi hui hai.</div>
+    </div>
+    <div class="card">
+      <div class="actions">
+        <button class="btn btn-primary" id="makeBtn" disabled>PDF Banayein aur Download Karein</button>
+        <button class="btn btn-ghost" id="clearBtn">Sab Clear Karein</button>
+        <span class="count" id="countLabel">0 images</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lb-close" id="lbClose">✕</button>
+    <img id="lbImg" src="" alt="">
+  </div>
+</div>
+
+<div id="tool2" class="tool-container">
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-text">
+          <h1>SSCGRAM PDF Toolkit</h1>
+          <p>SPLIT · MERGE · REORDER · WATERMARK</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn ghost" id="resetBtn">↺ Reset all</button>
+        <button class="btn primary" id="exportAllBtn">⬇ Export / Merge PDF</button>
+      </div>
+    </div>
+    <div class="layout">
+      <div class="sidebar-scroll">
+        <div class="panel">
+          <h2><span class="num">1</span> PDF Upload Karein</h2>
+          <div class="dropzone" id="dropzone"><p>Yahan drag-drop karein ya click karein</p></div>
+          <input type="file" id="fileInput" accept="application/pdf" multiple>
+          <ul class="file-list" id="fileList"></ul>
+        </div>
+        <div class="panel">
+          <h2><span class="num">2</span> Split PDF</h2>
+          <div class="field mono"><input type="text" id="splitInput" placeholder="1-3, 5, 7-9"></div>
+          <div class="row" style="display:flex;gap:8px;">
+            <button class="btn sm" id="splitBtn" style="flex:1;">✂ Split</button>
+            <button class="btn sm ghost" id="splitEachBtn">Har page alag</button>
+          </div>
+        </div>
+      </div>
+      <div class="workspace-scroll">
+        <div class="workspace-head">
+          <h2>Pages — drag karke order badlein, rotate/zoom/remove karein</h2>
+          <span class="count" id="pageCount">0 pages loaded</span>
+        </div>
+        <div class="empty-state" id="emptyState"><p><strong>Abhi koi PDF load nahi hui.</strong></p></div>
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-top">
+        <span class="info" id="modalInfo">Page 1 / 1</span>
+        <button class="btn ghost sm" id="modalClose">✕ Close</button>
+      </div>
+      <div class="modal-body"><canvas id="modalCanvas"></canvas></div>
+    </div>
+  </div>
+  <div class="busy-overlay" id="busyOverlay"><div class="busy-ring"></div><p id="busyText">Processing…</p></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ================= TAB SWITCHING LOGIC =================
+function switchTab(tabId) {
+  document.querySelectorAll('.tool-container').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.main-navbar button').forEach(el => el.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.getElementById('nav-' + tabId).classList.add('active');
+}
+
+// ================= TOOL 1 LOGIC (Isolated) =================
+{
+  const $1 = (id) => document.querySelector('#tool1 #' + id);
+  const { jsPDF } = window.jspdf;
+  let images = [];
+  
+  const fileInput = $1('fileInput');
+  const dropZone = $1('dropZone');
+  const imageList = $1('imageList');
+  const makeBtn = $1('makeBtn');
+  
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+  dropZone.addEventListener('drop', e => { e.preventDefault(); addFiles(e.dataTransfer.files); });
+  fileInput.addEventListener('change', e => addFiles(e.target.files));
+
+  async function addFiles(fileListRaw){
+    const files = Array.from(fileListRaw).filter(f => f.type.startsWith('image/'));
+    for (const file of files) {
+      const id = 'img_' + Date.now();
+      const dataUrl = await new Promise(r => { const reader = new FileReader(); reader.onload=()=>r(reader.result); reader.readAsDataURL(file); });
+      images.push({ id, file, url: dataUrl });
+    }
+    render();
+  }
+
+  function render(){
+    imageList.innerHTML = '';
+    $1('emptyHint').style.display = images.length ? 'none' : 'block';
+    images.forEach((img, idx) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<img src="${img.url}" alt=""><div class="fname">${img.file.name}</div>`;
+      imageList.appendChild(li);
+    });
+    makeBtn.disabled = images.length === 0;
+    $1('countLabel').textContent = images.length + ' images';
+  }
+
+  makeBtn.addEventListener('click', async () => {
+    if (!images.length) return;
+    const doc = new jsPDF();
+    for (let i = 0; i < images.length; i++) {
+      if (i > 0) doc.addPage();
+      doc.addImage(images[i].url, 'JPEG', 10, 10, 190, 270, undefined, 'FAST');
+    }
+    doc.save(($1('fileTitle').value || 'document') + '.pdf');
+  });
+}
+
+// ================= TOOL 2 LOGIC (Isolated) =================
+{
+  const $2 = (id) => document.querySelector('#tool2 #' + id);
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  
+  let workspace = [];
+  let sourceDocs = {};
+  
+  $2('dropzone').addEventListener('click', ()=> $2('fileInput').click());
+  $2('fileInput').addEventListener('change', e => handleFiles([...e.target.files]));
+
+  async function handleFiles(files){
+    for(const file of files){
+      const docId = 'd' + Date.now();
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      sourceDocs[docId] = { name:file.name, bytes, pdfLibDocPromise:null };
+      
+      const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes.slice() }).promise;
+      for(let i=0; i<pdfjsDoc.numPages; i++){
+        workspace.push({ uid: Math.random(), docId, pageIndex:i, rotation:0 });
+      }
+      $2('emptyState').style.display = 'none';
+      $2('pageCount').textContent = workspace.length + ' pages loaded';
+      toast(file.name + ' loaded');
+    }
+  }
+
+  $2('exportAllBtn').addEventListener('click', async ()=>{
+    if(!workspace.length) return toast('Pehle PDF upload karein.', true);
+    $2('busyOverlay').classList.add('open');
+    try{
+      const { PDFDocument } = PDFLib;
+      const outDoc = await PDFDocument.create();
+      for(const entry of workspace){
+        const srcDoc = await PDFDocument.load(sourceDocs[entry.docId].bytes);
+        const [copied] = await outDoc.copyPages(srcDoc, [entry.pageIndex]);
+        outDoc.addPage(copied);
+      }
+      const bytes = await outDoc.save();
+      const blob = new Blob([bytes], {type:'application/pdf'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'merged.pdf';
+      a.click();
+    }catch(e){ toast('Error', true); }
+    $2('busyOverlay').classList.remove('open');
+  });
+
+  function toast(msg, err){
+    const t = $2('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + (err ? 'err' : '');
+    setTimeout(()=>t.classList.remove('show'), 3000);
+  }
+}
+</script>
+</body>
+</html>
