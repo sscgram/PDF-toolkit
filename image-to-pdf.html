@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image to PDF — SSCGRAM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#12151c;
+    --panel:#1a1f2b;
+    --panel-2:#212739;
+    --line:#2c3346;
+    --text:#eef0f5;
+    --muted:#9aa3b8;
+    --accent:#f2a93b;
+    --accent-2:#5fd0c0;
+    --danger:#e5637a;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Segoe UI', 'Noto Sans Devanagari', system-ui, sans-serif;
+    min-height:100vh;
+  }
+  header{
+    padding:28px 20px 18px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+  }
+  header .brand{
+    font-size:13px;
+    letter-spacing:2px;
+    color:var(--accent-2);
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  header h1{
+    margin:6px 0 4px;
+    font-size:26px;
+    font-weight:800;
+  }
+  header p{
+    margin:0;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .wrap{
+    max-width:980px;
+    margin:0 auto;
+    padding:24px 16px 60px;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:18px;
+  }
+  .drop{
+    border:2px dashed var(--line);
+    border-radius:var(--radius);
+    padding:30px 16px;
+    text-align:center;
+    cursor:pointer;
+    transition:.15s border-color, .15s background;
+  }
+  .drop:hover, .drop.drag{
+    border-color:var(--accent);
+    background:rgba(242,169,59,0.06);
+  }
+  .drop .icon{font-size:34px; display:block; margin-bottom:8px;}
+  .drop strong{color:var(--text); font-size:15px;}
+  .drop span{display:block; color:var(--muted); font-size:13px; margin-top:4px;}
+  input[type=file]{display:none;}
+
+  .options{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
+    gap:16px;
+    margin-top:6px;
+  }
+  .opt-group label.title{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:8px;
+  }
+  .seg{
+    display:flex;
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .seg button{
+    flex:1;
+    padding:9px 6px;
+    background:var(--panel-2);
+    color:var(--muted);
+    border:none;
+    cursor:pointer;
+    font-size:13px;
+    border-right:1px solid var(--line);
+  }
+  .seg button:last-child{border-right:none;}
+  .seg button.active{
+    background:var(--accent);
+    color:#1a1206;
+    font-weight:700;
+  }
+
+  #imageList{
+    list-style:none;
+    margin:0; padding:0;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(120px,1fr));
+    gap:14px;
+  }
+  #imageList li{
+    position:relative;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px;
+    cursor:grab;
+    text-align:center;
+    user-select:none;
+  }
+  #imageList li.dragging{opacity:.4;}
+  #imageList li img{
+    width:100%;
+    height:110px;
+    object-fit:cover;
+    border-radius:6px;
+    display:block;
+    cursor:zoom-in;
+  }
+  #imageList li .zoom-hint{
+    position:absolute;
+    inset:8px 8px auto 8px;
+    top:auto;
+    bottom:26px;
+    text-align:center;
+    font-size:10px;
+    color:var(--muted);
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .15s;
+  }
+  #imageList li:hover .zoom-hint{opacity:1;}
+
+  .lightbox{
+    position:fixed;
+    inset:0;
+    background:rgba(6,8,14,0.92);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:30px;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox img{
+    max-width:100%;
+    max-height:100%;
+    border-radius:8px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .lightbox .lb-close{
+    position:absolute;
+    top:20px; right:24px;
+    background:var(--panel-2);
+    color:var(--text);
+    border:1px solid var(--line);
+    width:38px; height:38px;
+    border-radius:50%;
+    font-size:18px;
+    cursor:pointer;
+  }
+  .lightbox .lb-caption{
+    position:absolute;
+    bottom:20px;
+    left:0; right:0;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+  }
+  .lightbox .lb-nav{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    background:var(--panel-2);
+    color:var(--text);
+    border:1px solid var(--line);
+    width:44px; height:44px;
+    border-radius:50%;
+    font-size:20px;
+    cursor:pointer;
+  }
+  .lightbox .lb-prev{left:20px;}
+  .lightbox .lb-next{right:20px;}
+  #imageList li .num{
+    position:absolute;
+    top:4px; left:4px;
+    background:var(--accent);
+    color:#1a1206;
+    font-size:11px;
+    font-weight:800;
+    width:20px; height:20px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #imageList li .rm{
+    position:absolute;
+    top:4px; right:4px;
+    background:var(--danger);
+    color:#fff;
+    border:none;
+    width:20px; height:20px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:13px;
+    line-height:1;
+  }
+  #imageList li .fname{
+    margin-top:6px;
+    font-size:11px;
+    color:var(--muted);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .empty-hint{
+    color:var(--muted);
+    font-size:13px;
+    text-align:center;
+    padding:10px;
+  }
+
+  .actions{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .btn{
+    padding:12px 22px;
+    border:none;
+    border-radius:8px;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .btn-primary{
+    background:var(--accent);
+    color:#1a1206;
+  }
+  .btn-primary:disabled{
+    background:#4a4536;
+    color:#8a8577;
+    cursor:not-allowed;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--muted);
+    border:1px solid var(--line);
+  }
+  .count{
+    color:var(--muted);
+    font-size:13px;
+  }
+  .meta{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:10px;
+    line-height:1.5;
+  }
+  .meta b{color:var(--accent-2);}
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    padding:20px;
+  }
+
+  /* ---- Advanced / optional sections ---- */
+  .section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:4px;
+  }
+  .section-head h3{
+    margin:0;
+    font-size:15px;
+    font-weight:800;
+  }
+  .subtag{
+    font-size:11px;
+    color:var(--muted);
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  .switch{
+    position:relative;
+    width:42px;
+    height:24px;
+    display:inline-block;
+    flex-shrink:0;
+  }
+  .switch input{display:none;}
+  .switch .slider{
+    position:absolute;
+    inset:0;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:999px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .switch .slider::before{
+    content:'';
+    position:absolute;
+    width:16px; height:16px;
+    left:3px; top:3px;
+    background:var(--muted);
+    border-radius:50%;
+    transition:.15s;
+  }
+  .switch input:checked + .slider{background:rgba(242,169,59,0.25); border-color:var(--accent);}
+  .switch input:checked + .slider::before{transform:translateX(18px); background:var(--accent);}
+
+  .subpanel{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px dashed var(--line);
+    display:none;
+  }
+  .subpanel.open{display:block;}
+
+  .field-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(160px,1fr));
+    gap:14px;
+    margin-bottom:12px;
+  }
+  .field label{
+    display:block;
+    font-size:11px;
+    font-weight:700;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    margin-bottom:6px;
+  }
+  .field input[type=text],
+  .field input[type=number],
+  .field select{
+    width:100%;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:9px 10px;
+    border-radius:7px;
+    font-size:13px;
+  }
+  .field input[type=range]{
+    width:100%;
+    accent-color:var(--accent);
+  }
+  .field .range-val{
+    font-size:11px;
+    color:var(--accent-2);
+    font-weight:700;
+  }
+  .field-full{grid-column:1 / -1;}
+  .hr-divider{
+    border:none;
+    border-top:1px solid var(--line);
+    margin:14px 0;
+  }
+  .mini-note{
+    font-size:11px;
+    color:var(--muted);
+    margin-top:-6px;
+    margin-bottom:10px;
+  }
+  #wmImagePreview{
+    max-width:120px;
+    max-height:80px;
+    border-radius:6px;
+    border:1px solid var(--line);
+    display:none;
+    margin-top:8px;
+  }
+  .filename-preview{
+    font-size:13px;
+    color:var(--accent-2);
+    margin-top:10px;
+    word-break:break-all;
+  }
+  .filename-preview b{color:var(--text);}
+
+  /* ---- Rotate controls ---- */
+  .thumb-tools{
+    display:flex;
+    gap:6px;
+    margin-top:6px;
+  }
+  .rot-btn{
+    flex:1;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--text);
+    border-radius:6px;
+    padding:5px 4px;
+    font-size:14px;
+    cursor:pointer;
+    line-height:1;
+  }
+  .rot-btn:hover{border-color:var(--accent); color:var(--accent);}
+  .rot-btn:disabled{opacity:.4; cursor:wait;}
+
+  .lb-tools{
+    position:absolute;
+    top:20px;
+    left:24px;
+    display:flex;
+    gap:10px;
+  }
+  .lb-rotate{
+    background:var(--panel-2);
+    color:var(--text);
+    border:1px solid var(--line);
+    width:38px; height:38px;
+    border-radius:50%;
+    font-size:16px;
+    cursor:pointer;
+  }
+  .lb-rotate:hover{border-color:var(--accent); color:var(--accent);}
+  .lb-rotate:disabled{opacity:.4; cursor:wait;}
+
+  /* ---- Drag handle (mouse + touch reordering) ---- */
+  .drag-handle{
+    margin-top:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:5px 4px;
+    font-size:13px;
+    color:var(--muted);
+    cursor:grab;
+    touch-action:none;
+    user-select:none;
+  }
+  .drag-handle:active{cursor:grabbing; color:var(--accent); border-color:var(--accent);}
+  #imageList li.dragging{
+    opacity:.5;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+    z-index:5;
+  }
+  #imageList li.drag-over{
+    outline:2px dashed var(--accent);
+    outline-offset:2px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">SSCGRAM.COM</div>
+  <h1>Image → PDF Converter</h1>
+  <p>Sab kuch aapke browser mein hi hota hai — koi upload nahi, koi internet zaroorat nahi.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <div class="drop" id="dropZone">
+      <span class="icon">🖼️</span>
+      <strong>Images yahan drop karein ya click karke chunein</strong>
+      <span>JPG, PNG, WEBP — multiple images ek saath</span>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" multiple>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <h3>Header <span class="subtag">Optional</span></h3>
+      <label class="switch">
+        <input type="checkbox" id="headerToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="subpanel" id="headerPanel">
+      <div class="field-grid">
+        <div class="field field-full">
+          <label>Header Text</label>
+          <input type="text" id="headerText" placeholder="e.g. SSCGRAM.COM">
+        </div>
+        <div class="field">
+          <label>Font Size (pt)</label>
+          <input type="number" id="headerFontSize" value="12" min="6" max="60">
+        </div>
+        <div class="field">
+          <label>Font Style</label>
+          <select id="headerFontStyle">
+            <option value="normal">Normal</option>
+            <option value="bold">Bold</option>
+            <option value="italic">Italic</option>
+            <option value="bolditalic">Bold Italic</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Alignment</label>
+          <select id="headerAlign">
+            <option value="center">Center</option>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Top Padding / Margin (mm) <span class="range-val" id="headerPadVal">10</span></label>
+          <input type="range" id="headerPad" min="2" max="40" value="10">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <h3>Footer <span class="subtag">Optional</span></h3>
+      <label class="switch">
+        <input type="checkbox" id="footerToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="subpanel" id="footerPanel">
+      <div class="field-grid">
+        <div class="field field-full">
+          <label>Footer Text</label>
+          <input type="text" id="footerText" placeholder="e.g. www.sscgram.com">
+        </div>
+        <div class="field">
+          <label>Font Size (pt)</label>
+          <input type="number" id="footerFontSize" value="10" min="6" max="60">
+        </div>
+        <div class="field">
+          <label>Font Style</label>
+          <select id="footerFontStyle">
+            <option value="normal">Normal</option>
+            <option value="bold">Bold</option>
+            <option value="italic">Italic</option>
+            <option value="bolditalic">Bold Italic</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Alignment</label>
+          <select id="footerAlign">
+            <option value="center">Center</option>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Bottom Padding / Margin (mm) <span class="range-val" id="footerPadVal">10</span></label>
+          <input type="range" id="footerPad" min="2" max="40" value="10">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <h3>Watermark <span class="subtag">Optional</span></h3>
+      <label class="switch">
+        <input type="checkbox" id="watermarkToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="subpanel" id="watermarkPanel">
+      <div class="opt-group" style="margin-bottom:14px;">
+        <label class="title">Watermark Type</label>
+        <div class="seg" id="wmTypeSeg">
+          <button data-val="text" class="active">Text</button>
+          <button data-val="image">Image</button>
+        </div>
+      </div>
+
+      <div id="wmTextFields">
+        <div class="field-grid">
+          <div class="field field-full">
+            <label>Watermark Text</label>
+            <input type="text" id="wmText" placeholder="e.g. SSCGRAM">
+          </div>
+          <div class="field">
+            <label>Font Size (pt)</label>
+            <input type="number" id="wmFontSize" value="60" min="10" max="200">
+          </div>
+          <div class="field">
+            <label>Font Style</label>
+            <select id="wmFontStyle">
+              <option value="normal">Normal</option>
+              <option value="bold" selected>Bold</option>
+              <option value="italic">Italic</option>
+              <option value="bolditalic">Bold Italic</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Rotation (°)</label>
+            <input type="number" id="wmRotation" value="-45" min="-90" max="90">
+          </div>
+        </div>
+      </div>
+
+      <div id="wmImageFields" style="display:none;">
+        <div class="field-grid">
+          <div class="field field-full">
+            <label>Watermark Image</label>
+            <input type="file" id="wmImageInput" accept="image/*" style="display:block; background:var(--panel-2); border:1px solid var(--line); border-radius:7px; padding:8px; color:var(--muted); width:100%;">
+            <img id="wmImagePreview">
+          </div>
+          <div class="field">
+            <label>Size (% of page width) <span class="range-val" id="wmSizeVal">50</span></label>
+            <input type="range" id="wmSize" min="10" max="100" value="50">
+          </div>
+        </div>
+      </div>
+
+      <hr class="hr-divider">
+      <div class="field-grid">
+        <div class="field">
+          <label>Washout / Opacity (%) <span class="range-val" id="wmOpacityVal">15</span></label>
+          <input type="range" id="wmOpacity" min="3" max="80" value="15">
+        </div>
+      </div>
+      <div class="mini-note">Kam % = zyada halka (washed out), zyada % = zyada gehra watermark.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <h3>File Name / Title</h3>
+    </div>
+    <div class="field-grid">
+      <div class="field field-full">
+        <label>File Name likhein</label>
+        <input type="text" id="fileTitle" placeholder="e.g. My Documents">
+      </div>
+    </div>
+    <div class="filename-preview">PDF Title aur File Name banega: <b id="fileNamePreview">Document convert.. by sscgram.pdf</b></div>
+  </div>
+
+  <div class="card">
+    <div class="opt-group" style="margin-bottom:14px;">
+      <label class="title">Page Orientation (A4)</label>
+      <div class="seg" id="orientSeg">
+        <button data-val="portrait" class="active">Portrait</button>
+        <button data-val="landscape">Landscape</button>
+      </div>
+    </div>
+    <div class="opt-group">
+      <label class="title">Margin</label>
+      <div class="seg" id="marginSeg">
+        <button data-val="0">No Margin</button>
+        <button data-val="8" class="active">Small Margin</button>
+        <button data-val="20">Large Margin</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <label class="title" style="display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">
+      Images (jis order mein hain, usi order mein PDF banegi — drag karke order badal sakte hain)
+    </label>
+    <ul id="imageList"></ul>
+    <div class="empty-hint" id="emptyHint">Abhi koi image add nahi hui hai.</div>
+  </div>
+
+  <div class="card">
+    <div class="actions">
+      <button class="btn btn-primary" id="makeBtn" disabled>PDF Banayein aur Download Karein</button>
+      <button class="btn btn-ghost" id="clearBtn">Sab Clear Karein</button>
+      <span class="count" id="countLabel">0 images</span>
+    </div>
+    <div class="meta">PDF Metadata — Author: <b>SSCGRAM</b> &nbsp;|&nbsp; Title/File Name: jo aapne "File Name / Title" box mein likha hai, uske end mein automatically <b>convert.. by sscgram</b> add ho jayega.</div>
+  </div>
+
+</div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lb-tools">
+    <button class="lb-rotate" id="lbRotateLeft" title="Left rotate karein">⟲</button>
+    <button class="lb-rotate" id="lbRotateRight" title="Right rotate karein">⟳</button>
+  </div>
+  <button class="lb-close" id="lbClose">✕</button>
+  <button class="lb-nav lb-prev" id="lbPrev">‹</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lb-nav lb-next" id="lbNext">›</button>
+  <div class="lb-caption" id="lbCaption"></div>
+</div>
+
+<footer>Made for offline use • no data leaves your device</footer>
+
+<script>
+const { jsPDF } = window.jspdf;
+
+let images = []; // {id, file, url, w, h}
+let orientation = 'portrait';
+let margin = 8;
+
+const fileInput = document.getElementById('fileInput');
+const dropZone = document.getElementById('dropZone');
+const imageList = document.getElementById('imageList');
+const emptyHint = document.getElementById('emptyHint');
+const makeBtn = document.getElementById('makeBtn');
+const clearBtn = document.getElementById('clearBtn');
+const countLabel = document.getElementById('countLabel');
+const orientSeg = document.getElementById('orientSeg');
+const marginSeg = document.getElementById('marginSeg');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag');
+  addFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e => addFiles(e.target.files));
+
+// ---- EXIF orientation helpers (fixes photos rotating in the generated PDF) ----
+function getExifOrientation(file){
+  return new Promise((resolve) => {
+    if (!file.type || !file.type.includes('jpeg')) { resolve(1); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const view = new DataView(e.target.result);
+        if (view.getUint16(0, false) !== 0xFFD8) { resolve(1); return; }
+        const length = view.byteLength;
+        let offset = 2;
+        while (offset < length) {
+          const marker = view.getUint16(offset, false);
+          offset += 2;
+          if (marker === 0xFFE1) {
+            if (view.getUint32(offset + 2, false) !== 0x45786966) { resolve(1); return; }
+            const tiffOffset = offset + 8;
+            const little = view.getUint16(tiffOffset, false) === 0x4949;
+            const firstIFDOffset = view.getUint32(tiffOffset + 4, little);
+            let dirOffset = tiffOffset + firstIFDOffset;
+            const tags = view.getUint16(dirOffset, little);
+            dirOffset += 2;
+            for (let i = 0; i < tags; i++) {
+              const entryOffset = dirOffset + i * 12;
+              if (view.getUint16(entryOffset, little) === 0x0112) {
+                resolve(view.getUint16(entryOffset + 8, little));
+                return;
+              }
+            }
+            resolve(1);
+            return;
+          } else if ((marker & 0xFF00) !== 0xFF00) {
+            break;
+          } else {
+            offset += view.getUint16(offset, false);
+          }
+        }
+        resolve(1);
+      } catch (err) {
+        resolve(1);
+      }
+    };
+    reader.onerror = () => resolve(1);
+    reader.readAsArrayBuffer(file.slice(0, 128 * 1024));
+  });
+}
+
+// Draws the source image onto a canvas, applying the correct rotation/flip
+// so the pixel data itself matches what the browser shows visually.
+function normalizeImageOrientation(file){
+  return new Promise(async (resolve) => {
+    const orientation = await getExifOrientation(file);
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const iw = img.naturalWidth, ih = img.naturalHeight;
+
+      if (orientation <= 1) {
+        // no correction needed, use original file as-is
+        resolve({ dataUrl: objectUrl, w: iw, h: ih, isObjectUrl: true, type: file.type.includes('png') ? 'PNG' : 'JPEG' });
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (orientation >= 5 && orientation <= 8) {
+        canvas.width = ih;
+        canvas.height = iw;
+      } else {
+        canvas.width = iw;
+        canvas.height = ih;
+      }
+
+      switch (orientation) {
+        case 2: ctx.transform(-1, 0, 0, 1, iw, 0); break;
+        case 3: ctx.transform(-1, 0, 0, -1, iw, ih); break;
+        case 4: ctx.transform(1, 0, 0, -1, 0, ih); break;
+        case 5: ctx.transform(0, 1, 1, 0, 0, 0); break;
+        case 6: ctx.transform(0, 1, -1, 0, ih, 0); break;
+        case 7: ctx.transform(0, -1, -1, 0, ih, iw); break;
+        case 8: ctx.transform(0, -1, 1, 0, 0, iw); break;
+        default: break;
+      }
+
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(objectUrl);
+      resolve({
+        dataUrl: canvas.toDataURL('image/jpeg', 0.95),
+        w: canvas.width,
+        h: canvas.height,
+        isObjectUrl: false,
+        type: 'JPEG'
+      });
+    };
+    img.onerror = () => {
+      resolve({ dataUrl: objectUrl, w: 0, h: 0, isObjectUrl: true, type: file.type.includes('png') ? 'PNG' : 'JPEG' });
+    };
+    img.src = objectUrl;
+  });
+}
+
+// Rotates the given (already-loaded) image data by ±90/180 degrees and
+// bakes the result into a fresh dataUrl — used both for manual "fix rotation"
+// clicks on thumbnails and in the zoom view. Since it re-draws pixels, the
+// same corrected image is what ends up in the final PDF.
+function rotateImageData(srcUrl, w, h, degrees){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const norm = ((degrees % 360) + 360) % 360;
+
+      if (norm === 90 || norm === 270) {
+        canvas.width = h;
+        canvas.height = w;
+      } else {
+        canvas.width = w;
+        canvas.height = h;
+      }
+
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((norm * Math.PI) / 180);
+      ctx.drawImage(img, -w / 2, -h / 2);
+
+      resolve({
+        dataUrl: canvas.toDataURL('image/jpeg', 0.95),
+        w: canvas.width,
+        h: canvas.height
+      });
+    };
+    img.onerror = reject;
+    img.src = srcUrl;
+  });
+}
+
+async function rotateImage(id, degrees){
+  const idx = images.findIndex(i => i.id === id);
+  if (idx === -1) return;
+  const img = images[idx];
+  try {
+    const rotated = await rotateImageData(img.url, img.w, img.h, degrees);
+    images[idx] = {
+      ...img,
+      url: rotated.dataUrl,
+      w: rotated.w,
+      h: rotated.h,
+      pdfType: 'JPEG'
+    };
+    render();
+    if (lightbox.classList.contains('open') && lbIndex === idx) updateLightbox();
+  } catch (err) {
+    console.error('Rotate failed', err);
+  }
+}
+
+async function addFiles(fileListRaw){
+  const files = Array.from(fileListRaw).filter(f => f.type.startsWith('image/'));
+  for (const file of files) {
+    const id = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    const normalized = await normalizeImageOrientation(file);
+    images.push({
+      id,
+      file,
+      url: normalized.dataUrl,   // already orientation-corrected, safe for both preview and PDF
+      w: normalized.w,
+      h: normalized.h,
+      pdfType: normalized.type
+    });
+    render(); // progressive render as each image loads
+  }
+  fileInput.value = '';
+  render();
+}
+
+function render(){
+  imageList.innerHTML = '';
+  emptyHint.style.display = images.length ? 'none' : 'block';
+  images.forEach((img, idx) => {
+    const li = document.createElement('li');
+    li.dataset.id = img.id;
+    li.innerHTML = `
+      <div class="num">${idx+1}</div>
+      <button class="rm" title="Remove">✕</button>
+      <img src="${img.url}" alt="">
+      <div class="zoom-hint">🔍 Full size dekhein</div>
+      <div class="thumb-tools">
+        <button class="rot-btn rot-left" title="Left rotate karein">⟲</button>
+        <button class="rot-btn rot-right" title="Right rotate karein">⟳</button>
+      </div>
+      <div class="drag-handle" title="Drag karke order badlein">⠿ Order badlein</div>
+      <div class="fname">${img.file.name}</div>
+    `;
+    li.querySelector('img').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLightbox(idx);
+    });
+    li.querySelector('.rm').addEventListener('click', (e) => {
+      e.stopPropagation();
+      images = images.filter(i => i.id !== img.id);
+      render();
+    });
+    li.querySelector('.rot-left').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      await rotateImage(img.id, -90);
+      btn.disabled = false;
+    });
+    li.querySelector('.rot-right').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      await rotateImage(img.id, 90);
+      btn.disabled = false;
+    });
+    attachDragHandle(li, li.querySelector('.drag-handle'));
+    imageList.appendChild(li);
+  });
+
+  countLabel.textContent = images.length + (images.length === 1 ? ' image' : ' images');
+  makeBtn.disabled = images.length === 0;
+}
+
+// ---- Drag-and-drop reordering (Pointer Events => works with mouse AND touch/mobile) ----
+let dragState = null; // { pointerId, li }
+
+function getLiUnderPoint(x, y){
+  const el = document.elementFromPoint(x, y);
+  if (!el) return null;
+  return el.closest('#imageList > li');
+}
+
+function attachDragHandle(li, handle){
+  if (!handle) return;
+  handle.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+    li.classList.add('dragging');
+    dragState = { pointerId: e.pointerId, li };
+  });
+}
+
+function onDragPointerMove(e){
+  if (!dragState || e.pointerId !== dragState.pointerId) return;
+  document.querySelectorAll('#imageList li.drag-over').forEach(el => el.classList.remove('drag-over'));
+  const targetLi = getLiUnderPoint(e.clientX, e.clientY);
+  if (!targetLi || targetLi === dragState.li) return;
+  targetLi.classList.add('drag-over');
+  const rect = targetLi.getBoundingClientRect();
+  const after = (e.clientX - rect.left) > rect.width / 2;
+  targetLi.parentNode.insertBefore(dragState.li, after ? targetLi.nextSibling : targetLi);
+}
+
+function onDragPointerUp(e){
+  if (!dragState || e.pointerId !== dragState.pointerId) return;
+  dragState.li.classList.remove('dragging');
+  document.querySelectorAll('#imageList li.drag-over').forEach(el => el.classList.remove('drag-over'));
+  const newOrder = Array.from(imageList.children).map(li => li.dataset.id);
+  images = newOrder.map(id => images.find(i => i.id === id));
+  dragState = null;
+  render();
+}
+
+document.addEventListener('pointermove', onDragPointerMove);
+document.addEventListener('pointerup', onDragPointerUp);
+document.addEventListener('pointercancel', onDragPointerUp);
+
+orientSeg.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  orientation = btn.dataset.val;
+  [...orientSeg.children].forEach(b => b.classList.toggle('active', b === btn));
+});
+
+marginSeg.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  margin = parseFloat(btn.dataset.val);
+  [...marginSeg.children].forEach(b => b.classList.toggle('active', b === btn));
+});
+
+clearBtn.addEventListener('click', () => {
+  images = [];
+  render();
+});
+
+// ---- Header / Footer toggles ----
+const headerToggle = document.getElementById('headerToggle');
+const headerPanel = document.getElementById('headerPanel');
+const footerToggle = document.getElementById('footerToggle');
+const footerPanel = document.getElementById('footerPanel');
+const watermarkToggle = document.getElementById('watermarkToggle');
+const watermarkPanel = document.getElementById('watermarkPanel');
+
+headerToggle.addEventListener('change', () => headerPanel.classList.toggle('open', headerToggle.checked));
+footerToggle.addEventListener('change', () => footerPanel.classList.toggle('open', footerToggle.checked));
+watermarkToggle.addEventListener('change', () => watermarkPanel.classList.toggle('open', watermarkToggle.checked));
+
+// range value labels
+const headerPad = document.getElementById('headerPad');
+const headerPadVal = document.getElementById('headerPadVal');
+headerPad.addEventListener('input', () => headerPadVal.textContent = headerPad.value);
+
+const footerPad = document.getElementById('footerPad');
+const footerPadVal = document.getElementById('footerPadVal');
+footerPad.addEventListener('input', () => footerPadVal.textContent = footerPad.value);
+
+const wmOpacity = document.getElementById('wmOpacity');
+const wmOpacityVal = document.getElementById('wmOpacityVal');
+wmOpacity.addEventListener('input', () => wmOpacityVal.textContent = wmOpacity.value);
+
+const wmSize = document.getElementById('wmSize');
+const wmSizeVal = document.getElementById('wmSizeVal');
+wmSize.addEventListener('input', () => wmSizeVal.textContent = wmSize.value);
+
+// watermark type switch (text vs image)
+const wmTypeSeg = document.getElementById('wmTypeSeg');
+const wmTextFields = document.getElementById('wmTextFields');
+const wmImageFields = document.getElementById('wmImageFields');
+let wmType = 'text';
+wmTypeSeg.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  wmType = btn.dataset.val;
+  [...wmTypeSeg.children].forEach(b => b.classList.toggle('active', b === btn));
+  wmTextFields.style.display = wmType === 'text' ? 'block' : 'none';
+  wmImageFields.style.display = wmType === 'image' ? 'block' : 'none';
+});
+
+// watermark image upload + preview
+const wmImageInput = document.getElementById('wmImageInput');
+const wmImagePreview = document.getElementById('wmImagePreview');
+let wmImageData = null; // {dataUrl, w, h}
+wmImageInput.addEventListener('change', async () => {
+  const file = wmImageInput.files[0];
+  if (!file) return;
+  const normalized = await normalizeImageOrientation(file);
+  wmImageData = { dataUrl: normalized.dataUrl, w: normalized.w, h: normalized.h, type: normalized.type };
+  wmImagePreview.src = normalized.dataUrl;
+  wmImagePreview.style.display = 'block';
+});
+
+// file name / title preview
+const fileTitleInput = document.getElementById('fileTitle');
+const fileNamePreview = document.getElementById('fileNamePreview');
+function buildFullTitle(){
+  const base = fileTitleInput.value.trim() || 'Document';
+  return `${base} convert.. by sscgram`;
+}
+function updateFileNamePreview(){
+  fileNamePreview.textContent = buildFullTitle() + '.pdf';
+}
+fileTitleInput.addEventListener('input', updateFileNamePreview);
+updateFileNamePreview();
+
+function sanitizeFileName(name){
+  return name.replace(/[\\/:*?"<>|]/g, '').trim();
+}
+
+makeBtn.addEventListener('click', async () => {
+  if (!images.length) return;
+  makeBtn.disabled = true;
+  makeBtn.textContent = 'PDF Ban Raha Hai...';
+
+  const doc = new jsPDF({
+    orientation: orientation === 'landscape' ? 'landscape' : 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+
+  const useHeader = headerToggle.checked;
+  const useFooter = footerToggle.checked;
+  const useWatermark = watermarkToggle.checked;
+
+  // extra room reserved for header/footer text so it doesn't overlap the image
+  const headerReserve = useHeader ? (parseFloat(headerPad.value) + (parseInt(document.getElementById('headerFontSize').value, 10) * 0.5)) : 0;
+  const footerReserve = useFooter ? (parseFloat(footerPad.value) + (parseInt(document.getElementById('footerFontSize').value, 10) * 0.5)) : 0;
+
+  const availW = pageW - margin * 2;
+  const availH = pageH - margin * 2 - headerReserve - footerReserve;
+
+  function drawHeaderFooter(){
+    if (useHeader) {
+      const text = document.getElementById('headerText').value;
+      if (text) {
+        const size = parseFloat(document.getElementById('headerFontSize').value) || 12;
+        const style = document.getElementById('headerFontStyle').value;
+        const align = document.getElementById('headerAlign').value;
+        const pad = parseFloat(headerPad.value);
+        doc.setFont('helvetica', style);
+        doc.setFontSize(size);
+        doc.setTextColor(40, 40, 40);
+        let x = pageW / 2;
+        if (align === 'left') x = margin;
+        if (align === 'right') x = pageW - margin;
+        doc.text(text, x, pad, { align });
+      }
+    }
+    if (useFooter) {
+      const text = document.getElementById('footerText').value;
+      if (text) {
+        const size = parseFloat(document.getElementById('footerFontSize').value) || 10;
+        const style = document.getElementById('footerFontStyle').value;
+        const align = document.getElementById('footerAlign').value;
+        const pad = parseFloat(footerPad.value);
+        doc.setFont('helvetica', style);
+        doc.setFontSize(size);
+        doc.setTextColor(40, 40, 40);
+        let x = pageW / 2;
+        if (align === 'left') x = margin;
+        if (align === 'right') x = pageW - margin;
+        doc.text(text, x, pageH - pad, { align });
+      }
+    }
+  }
+
+  function drawWatermark(){
+    if (!useWatermark) return;
+    const opacity = (parseFloat(wmOpacity.value) || 15) / 100;
+
+    doc.saveGraphicsState();
+    if (doc.GState) doc.setGState(new doc.GState({ opacity }));
+
+    if (wmType === 'text') {
+      const text = document.getElementById('wmText').value;
+      if (text) {
+        const size = parseFloat(document.getElementById('wmFontSize').value) || 60;
+        const style = document.getElementById('wmFontStyle').value;
+        const rotation = parseFloat(document.getElementById('wmRotation').value) || 0;
+        doc.setFont('helvetica', style);
+        doc.setFontSize(size);
+        doc.setTextColor(120, 120, 120);
+        doc.text(text, pageW / 2, pageH / 2, { align: 'center', angle: rotation });
+      }
+    } else if (wmType === 'image' && wmImageData) {
+      const sizePct = (parseFloat(wmSize.value) || 50) / 100;
+      const drawW = pageW * sizePct;
+      const drawH = drawW * (wmImageData.h / wmImageData.w);
+      const x = (pageW - drawW) / 2;
+      const y = (pageH - drawH) / 2;
+      try {
+        doc.addImage(wmImageData.dataUrl, wmImageData.type, x, y, drawW, drawH, undefined, 'FAST');
+      } catch (err) { /* ignore */ }
+    }
+
+    doc.restoreGraphicsState();
+  }
+
+  for (let i = 0; i < images.length; i++) {
+    const img = images[i];
+    if (i > 0) doc.addPage('a4', orientation === 'landscape' ? 'landscape' : 'portrait');
+
+    // img.url / img.w / img.h are already EXIF-orientation-corrected
+    // (computed once when the image was added), so we reuse them directly
+    // instead of re-reading the raw file — this is what keeps rotation correct.
+    let iw = img.w || 1000, ih = img.h || 1000;
+    const scale = Math.min(availW / iw, availH / ih);
+    const drawW = iw * scale;
+    const drawH = ih * scale;
+    const x = margin + (availW - drawW) / 2;
+    const y = margin + headerReserve + (availH - drawH) / 2;
+
+    try {
+      doc.addImage(img.url, img.pdfType || 'JPEG', x, y, drawW, drawH, undefined, 'FAST');
+    } catch (err) {
+      // fallback: re-fetch raw file if the cached dataUrl somehow fails
+      const dataUrl = await fileToDataUrl(img.file);
+      const type = img.file.type.includes('png') ? 'PNG' : 'JPEG';
+      doc.addImage(dataUrl, type, x, y, drawW, drawH, undefined, 'FAST');
+    }
+
+    drawHeaderFooter();
+    drawWatermark();
+  }
+
+  const fullTitle = buildFullTitle();
+  const safeFileName = sanitizeFileName(fullTitle) + '.pdf';
+
+  doc.setProperties({
+    title: fullTitle,
+    author: 'SSCGRAM',
+    creator: 'SSCGRAM.COM',
+    subject: 'Converted with SSCGRAM.COM'
+  });
+
+  doc.save(safeFileName);
+
+  makeBtn.disabled = false;
+  makeBtn.textContent = 'PDF Banayein aur Download Karein';
+});
+
+function fileToDataUrl(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ---- Lightbox (full-size preview) ----
+const lightbox = document.getElementById('lightbox');
+const lbImg = document.getElementById('lbImg');
+const lbCaption = document.getElementById('lbCaption');
+const lbClose = document.getElementById('lbClose');
+const lbPrev = document.getElementById('lbPrev');
+const lbNext = document.getElementById('lbNext');
+let lbIndex = 0;
+
+function openLightbox(idx){
+  if (!images.length) return;
+  lbIndex = idx;
+  updateLightbox();
+  lightbox.classList.add('open');
+}
+function updateLightbox(){
+  const img = images[lbIndex];
+  if (!img) return;
+  lbImg.src = img.url;
+  lbCaption.textContent = `${lbIndex + 1} / ${images.length} — ${img.file.name}`;
+}
+function closeLightbox(){
+  lightbox.classList.remove('open');
+}
+const lbRotateLeft = document.getElementById('lbRotateLeft');
+const lbRotateRight = document.getElementById('lbRotateRight');
+lbRotateLeft.addEventListener('click', async () => {
+  const img = images[lbIndex];
+  if (!img) return;
+  lbRotateLeft.disabled = true;
+  await rotateImage(img.id, -90);
+  lbRotateLeft.disabled = false;
+});
+lbRotateRight.addEventListener('click', async () => {
+  const img = images[lbIndex];
+  if (!img) return;
+  lbRotateRight.disabled = true;
+  await rotateImage(img.id, 90);
+  lbRotateRight.disabled = false;
+});
+
+lbClose.addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', (e) => {
+  if (e.target === lightbox) closeLightbox();
+});
+lbPrev.addEventListener('click', () => {
+  lbIndex = (lbIndex - 1 + images.length) % images.length;
+  updateLightbox();
+});
+lbNext.addEventListener('click', () => {
+  lbIndex = (lbIndex + 1) % images.length;
+  updateLightbox();
+});
+document.addEventListener('keydown', (e) => {
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') lbPrev.click();
+  if (e.key === 'ArrowRight') lbNext.click();
+});
+</script>
+
+</body>
+</html>
