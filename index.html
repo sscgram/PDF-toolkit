@@ -2,523 +2,189 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="SSCGRAM PDF Toolkit - Browser based PDF utilities">
 <title>SSCGRAM PDF Toolkit</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
-}
-
-body{
-    background:#0d1117;
-    color:#fff;
-}
-
-a{
-    text-decoration:none;
-}
-
-.container{
-    width:90%;
-    max-width:1300px;
-    margin:auto;
-}
-
-header{
-
-background:linear-gradient(135deg,#111,#1a1a1a,#000);
-
-padding:70px 0;
-
-border-bottom:1px solid rgba(255,215,0,.2);
-
-}
-
-.logo{
-
-font-size:42px;
-
-font-weight:800;
-
-color:#FFD700;
-
-}
-
-.logo span{
-
-color:#fff;
-
-}
-
-.hero{
-
-display:grid;
-
-grid-template-columns:1.2fr .8fr;
-
-gap:60px;
-
-align-items:center;
-
-}
-
-.hero h1{
-
-font-size:54px;
-
-line-height:1.2;
-
-margin-bottom:20px;
-
-}
-
-.hero h1 span{
-
-color:#FFD700;
-
-}
-
-.hero p{
-
-font-size:18px;
-
-color:#cfcfcf;
-
-line-height:1.8;
-
-margin-bottom:35px;
-
-}
-
-.buttons{
-
-display:flex;
-
-gap:20px;
-
-flex-wrap:wrap;
-
-}
-
-.btn{
-
-padding:15px 28px;
-
-border-radius:8px;
-
-font-weight:600;
-
-transition:.3s;
-
-}
-
-.primary{
-
-background:#FFD700;
-
-color:#111;
-
-}
-
-.primary:hover{
-
-transform:translateY(-3px);
-
-}
-
-.secondary{
-
-border:1px solid #FFD700;
-
-color:#FFD700;
-
-}
-
-.secondary:hover{
-
-background:#FFD700;
-
-color:#111;
-
-}
-
-.hero-card{
-
-background:#151515;
-
-padding:35px;
-
-border-radius:15px;
-
-border:1px solid rgba(255,215,0,.15);
-
-box-shadow:0 0 30px rgba(255,215,0,.08);
-
-}
-
-.hero-card h3{
-
-color:#FFD700;
-
-margin-bottom:20px;
-
-}
-
-.hero-card ul{
-
-padding-left:20px;
-
-}
-
-.hero-card li{
-
-margin:12px 0;
-
-color:#ddd;
-
-}
-
-section{
-
-padding:70px 0;
-
-}
-
-.section-title{
-
-font-size:34px;
-
-margin-bottom:40px;
-
-text-align:center;
-
-}
-
-.section-title span{
-
-color:#FFD700;
-
-}
-
-.grid{
-
-display:grid;
-
-grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-
-gap:30px;
-
-}
-
-.card{
-
-background:#161b22;
-
-padding:30px;
-
-border-radius:15px;
-
-border:1px solid rgba(255,215,0,.12);
-
-transition:.35s;
-
-}
-
-.card:hover{
-
-transform:translateY(-8px);
-
-border-color:#FFD700;
-
-}
-
-.card h3{
-
-color:#FFD700;
-
-margin-bottom:15px;
-
-}
-
-.card p{
-
-color:#cfcfcf;
-
-line-height:1.8;
-
-}
-
-.card a{
-
-display:inline-block;
-
-margin-top:25px;
-
-padding:12px 20px;
-
-background:#FFD700;
-
-color:#111;
-
-border-radius:7px;
-
-font-weight:600;
-
-}
-
-.tree{
-
-background:#101418;
-
-padding:30px;
-
-border-radius:15px;
-
-font-family:Consolas,monospace;
-
-line-height:2;
-
-overflow:auto;
-
-border-left:5px solid #FFD700;
-
-}
-
-.tree span{
-
-color:#FFD700;
-
-}
-
-footer{
-
-text-align:center;
-
-padding:30px;
-
-background:#090909;
-
-border-top:1px solid rgba(255,215,0,.1);
-
-color:#aaa;
-
-}
-
-footer strong{
-
-color:#FFD700;
-
-}
-
-@media(max-width:900px){
-
-.hero{
-
-grid-template-columns:1fr;
-
-}
-
-.hero h1{
-
-font-size:38px;
-
-}
-
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins,sans-serif;scroll-behavior:smooth}
+body{background:#0d1117;color:#e6edf3}
+header{background:linear-gradient(135deg,#0d1117,#161b22,#000);padding:80px 20px}
+.container{max-width:1200px;margin:auto}
+nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:50px}
+.logo{font-size:32px;font-weight:800;color:#ffd54a}
+.logo span{color:#fff}
+nav a{color:#ddd;text-decoration:none;margin-left:18px}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:40px}
+.hero h1{font-size:56px;line-height:1.15}
+.hero h1 span,.gold{color:#ffd54a}
+.hero p{margin:20px 0;color:#c9d1d9;line-height:1.8}
+.btn{display:inline-block;padding:14px 22px;border-radius:10px;text-decoration:none;font-weight:700;margin:8px}
+.primary{background:#ffd54a;color:#111}
+.secondary{border:1px solid #ffd54a;color:#ffd54a}
+.card{background:#161b22;border:1px solid #30363d;border-radius:16px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+section{padding:70px 20px}
+h2{text-align:center;font-size:36px;margin-bottom:35px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px}
+.stat{text-align:center;padding:25px;background:#161b22;border-radius:14px;border:1px solid #30363d}
+.stat b{display:block;font-size:34px;color:#ffd54a}
+ul{padding-left:20px;line-height:2}
+pre{background:#0b0f14;padding:18px;border-radius:10px;overflow:auto;border-left:4px solid #ffd54a}
+footer{padding:35px;text-align:center;background:#090c10;border-top:1px solid #30363d;color:#aaa}
+.small{font-size:.95rem;color:#9da7b3}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.hero h1{font-size:40px}nav{flex-direction:column;gap:15px}}
 </style>
-
 </head>
 <body>
 
 <header>
-
 <div class="container">
+<nav>
+<div class="logo">SSCGRAM<span>.COM</span></div>
+<div>
+<a href="#modules">Modules</a>
+<a href="#guide">Guide</a>
+<a href="#structure">Structure</a>
+<a href="#github">GitHub</a>
+</div>
+</nav>
 
 <div class="hero">
-
 <div>
-
-<div class="logo">SSCGRAM<span>.COM</span></div>
-
-<br>
-
 <h1>PDF <span>Toolkit</span></h1>
+<p>A modern, privacy-first PDF toolkit running entirely inside your browser. Convert images to PDF, split & merge PDF files, export PDF pages as images, and manage documents without uploading anything to a server.</p>
 
-<p>
-
-A modern browser-based PDF utility suite built with HTML5, JavaScript and Canvas.
-Convert Images to PDF, Split PDFs, Merge PDFs and Export PDF pages into Images —
-all without installing any software.
-
-</p>
-
-<div class="buttons">
-
-<a class="btn primary" href="image-to-pdf.html">
-📄 Image → PDF
-</a>
-
-<a class="btn secondary" href="split-merge-pdftoimage-advanced.html">
-⚡ Split / Merge Tool
-</a>
-
+<a class="btn primary" href="image-to-pdf.html">📄 Image → PDF</a>
+<a class="btn secondary" href="split-merge-pdftoimage.html">⚡ PDF Toolkit</a>
+<a class="btn secondary" href="https://github.com/sscgram/PDF-toolkit" target="_blank">⭐ GitHub</a>
 </div>
 
-</div>
-
-<div class="hero-card">
-
-<h3>Toolkit Features</h3>
-
+<div class="card">
+<h3 class="gold">Toolkit Highlights</h3>
 <ul>
-
-<li>✔ Image to PDF Converter</li>
-
-<li>✔ Split PDF Pages</li>
-
-<li>✔ Merge Multiple PDFs</li>
-
-<li>✔ Export PDF Pages as Images</li>
-
-<li>✔ Canvas Preview Support</li>
-
-<li>✔ Drag & Drop Interface</li>
-
-<li>✔ Fully Offline Browser Processing</li>
-
-<li>✔ No Upload Required</li>
-
+<li>100% Client Side</li>
+<li>Offline Ready</li>
+<li>No Upload Required</li>
+<li>Drag & Drop Support</li>
+<li>Canvas Rendering</li>
+<li>PDF.js + jsPDF</li>
+<li>GitHub Pages Ready</li>
+<li>MIT Licensed</li>
 </ul>
-
 </div>
-
 </div>
-
 </div>
-
 </header>
 
 <section>
-
 <div class="container">
+<div class="stats">
+<div class="stat"><b>100%</b>Client Side</div>
+<div class="stat"><b>0</b>Uploads</div>
+<div class="stat"><b>Offline</b>Ready</div>
+<div class="stat"><b>MIT</b>License</div>
+</div>
+</div>
+</section>
 
-<h2 class="section-title">
-Application <span>Modules</span>
-</h2>
+<section id="modules">
+<div class="container">
+<h2>Application <span class="gold">Modules</span></h2>
+<div class="grid">
+<div class="card">
+<h3>📄 Image to PDF</h3>
+<p>Create professional PDFs from JPG, PNG, JPEG and WEBP images with page sizing, watermark, headers and footers.</p>
+<p><a class="btn primary" href="image-to-pdf.html">Open Module</a></p>
+</div>
+
+<div class="card">
+<h3>⚡ Split • Merge Toolkit</h3>
+<p>Split PDFs, merge documents, rotate pages, reorder pages, preview via Canvas and export PDF pages as images.</p>
+<p><a class="btn primary" href="split-merge-pdftoimage.html">Launch Toolkit</a></p>
+</div>
+
+<div class="card">
+<h3>📘 Documentation</h3>
+<p>Complete setup instructions, deployment guide, project architecture and GitHub workflow.</p>
+<p><a class="btn primary" href="README.md">Read README</a></p>
+</div>
+</div>
+</div>
+</section>
+
+<section id="guide">
+<div class="container">
+<h2>Project <span class="gold">Guide</span></h2>
 
 <div class="grid">
 
 <div class="card">
-
-<h3>📄 Image to PDF</h3>
-
-<p>
-
-Convert multiple JPG, PNG and WEBP images into a single custom PDF.
-Arrange images, preserve quality and generate professional documents.
-
-</p>
-
-<a href="image-to-pdf.html">
-Open Module
-</a>
-
+<h3>Installation</h3>
+<pre>git clone https://github.com/sscgram/PDF-toolkit.git</pre>
+<p class="small">Open <b>index.html</b> directly or use VS Code Live Server.</p>
 </div>
 
 <div class="card">
-
-<h3>⚡ PDF Toolkit</h3>
-
-<p>
-
-Split PDF pages, merge multiple documents, preview pages using Canvas,
-and export PDF pages as images.
-
-</p>
-
-<a href="split-merge-pdftoimage-advanced.html">
-Launch Toolkit
-</a>
-
+<h3>GitHub Pages</h3>
+<ol>
+<li>Enable GitHub Pages.</li>
+<li>Select GitHub Actions.</li>
+<li>Push to <b>main</b>.</li>
+<li>Deployment runs automatically.</li>
+</ol>
 </div>
 
 <div class="card">
-
-<h3>📘 Documentation</h3>
-
-<p>
-
-Installation guide, deployment workflow, GitHub Pages configuration,
-license information and project documentation.
-
-</p>
-
-<a href="README.md">
-Read Guide
-</a>
-
+<h3>Technology Stack</h3>
+<ul>
+<li>HTML5</li>
+<li>CSS3</li>
+<li>JavaScript ES6</li>
+<li>PDF.js</li>
+<li>jsPDF</li>
+<li>Canvas API</li>
+<li>GitHub Actions</li>
+</ul>
 </div>
 
 </div>
-
 </div>
-
 </section>
 
-<section>
-
+<section id="structure">
 <div class="container">
+<h2>Project <span class="gold">Structure</span></h2>
 
-<h2 class="section-title">
-Project <span>Structure</span>
-</h2>
-
-<div class="tree">
-
-<span>.</span><br>
-
-├── .github/workflows/static.yml <br>
-│&nbsp;&nbsp;&nbsp;&nbsp;Optimized GitHub Pages Deployment Workflow<br><br>
-
-├── LICENSE<br>
-│&nbsp;&nbsp;&nbsp;&nbsp;MIT License<br><br>
-
-├── README.md<br>
-│&nbsp;&nbsp;&nbsp;&nbsp;Complete Installation & User Guide<br><br>
-
-├── image-to-pdf.html<br>
-│&nbsp;&nbsp;&nbsp;&nbsp;Image → PDF Converter Module<br><br>
-
-├── split-merge-pdftoimage-advanced.html<br>
-│&nbsp;&nbsp;&nbsp;&nbsp;Split • Merge • PDF to Image Toolkit<br><br>
-
-└── index.html<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Landing Dashboard
+<pre>.
+├── .github/
+│   └── workflows/
+│       └── static.yml
+├── LICENSE
+├── README.md
+├── image-to-pdf.html
+├── split-merge-pdftoimage.html
+└── index.html
+</pre>
 
 </div>
+</section>
 
+<section id="github">
+<div class="container">
+<h2>GitHub Repository</h2>
+<div class="card">
+<p><strong>Repository</strong></p>
+<p><a style="color:#ffd54a" href="https://github.com/sscgram/PDF-toolkit" target="_blank">https://github.com/sscgram/PDF-toolkit</a></p>
+<p class="small">Star ⭐ the project if you find it useful.</p>
 </div>
-
+</div>
 </section>
 
 <footer>
-
-<div class="container">
-
-<strong>SSCGRAM PDF Toolkit</strong><br><br>
-
-Built with ❤️ using HTML5, JavaScript, Canvas & PDF.js
-
-</div>
-
+<h3 class="gold">SSCGRAM PDF Toolkit</h3>
+<p>Made with ❤️ using HTML5, JavaScript, PDF.js & jsPDF</p>
+<p>MIT License • Version 1.0.0</p>
 </footer>
 
 </body>
