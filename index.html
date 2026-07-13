@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="SSCGRAM PDF Toolkit - Free browser-based PDF utilities. Convert images to PDF, split, merge, reorder pages, add watermarks, headers & footers. 100% client-side, no uploads.">
-<meta name="keywords" content="PDF toolkit, image to PDF, PDF splitter, PDF merger, online PDF editor, watermark PDF, free PDF tools">
+<meta name="description" content="SSCGRAM PDF Toolkit - Free online PDF converter & editor. Convert images to PDF, split, merge, watermark, add headers/footers. 100% client-side, no uploads, completely private.">
+<meta name="keywords" content="PDF toolkit, image to PDF, PDF splitter, PDF merger, watermark PDF, PDF header footer, online PDF editor, free PDF tools, PDF converter">
 <meta name="author" content="SSCGRAM">
 <meta name="theme-color" content="#d97706">
 <meta property="og:title" content="SSCGRAM PDF Toolkit - Free Online PDF Tools">
-<meta property="og:description" content="Convert images to PDF, split & merge documents, reorder pages. 100% client-side processing. No server, no tracking.">
+<meta property="og:description" content="Convert images to PDF, split & merge documents, add watermarks, headers & footers. 100% client-side, no tracking, completely free.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://raw.githubusercontent.com/sscgram/PDF-toolkit/main/SSCGRAM-LOGO.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="SSCGRAM PDF Toolkit">
-<meta name="twitter:description" content="Free online PDF tools - Convert, Split, Merge, Watermark PDFs">
-<title>SSCGRAM PDF Toolkit - Free Online PDF Converter & Editor</title>
+<meta name="twitter:description" content="Free online PDF tools - Convert, Split, Merge, Watermark PDFs instantly">
+<title>SSCGRAM PDF Toolkit - Free Online PDF Converter & Editor | Split, Merge, Watermark</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -206,6 +206,40 @@ h2 .gold{color:var(--gold)}
   border-bottom:1px dashed var(--gold);
 }
 
+/* ---------- WHY CHOOSE SECTION ---------- */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.feature-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;
+  text-align:center;transition:all .2s ease;display:flex;flex-direction:column;align-items:center;
+}
+.feature-card:hover{border-color:var(--gold);box-shadow:0 8px 24px rgba(217,119,6,.12);transform:translateY(-4px)}
+.feature-card .icon{font-size:28px;margin-bottom:10px;display:block;animation:float 3s ease-in-out infinite}
+.feature-card:nth-child(2) .icon{animation-delay:.2s}
+.feature-card:nth-child(3) .icon{animation-delay:.4s}
+.feature-card:nth-child(4) .icon{animation-delay:.6s}
+.feature-card:nth-child(5) .icon{animation-delay:.8s}
+.feature-card:nth-child(6) .icon{animation-delay:1s}
+.feature-card:nth-child(7) .icon{animation-delay:1.2s}
+.feature-card:nth-child(8) .icon{animation-delay:1.4s}
+.feature-card:nth-child(9) .icon{animation-delay:1.6s}
+.feature-card:nth-child(10) .icon{animation-delay:1.8s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.feature-card h4{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);margin:0 0 6px}
+.feature-card p{font-size:12px;color:var(--muted);margin:0;line-height:1.5}
+
+/* ---------- CAPABILITIES SECTION ---------- */
+.capabilities-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.capability-item{
+  background:linear-gradient(135deg,var(--panel) 0%,var(--panel-2) 100%);
+  border:1px solid var(--border);border-radius:8px;padding:14px;
+  display:flex;align-items:center;gap:10px;transition:.2s ease;
+}
+.capability-item:hover{border-color:var(--gold);transform:translateX(4px);background:linear-gradient(135deg,#fff9f0 0%,var(--panel) 100%)}
+.capability-item .check{
+  font-size:18px;color:var(--green);font-weight:bold;flex-shrink:0;
+}
+.capability-item span{font-family:var(--mono);font-size:12px;color:var(--text);font-weight:600}
+
 /* ---------- TERMINAL COMMAND BLOCKS ---------- */
 .term{
   background:#f5f6f8;border:1px solid var(--border);border-radius:8px;
@@ -271,6 +305,8 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
   h2{font-size:23px}
   .grid{gap:14px}
   .card{padding:18px}
+  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .capabilities-list{grid-template-columns:repeat(2,1fr)}
 }
 
 @media(max-width:640px){
@@ -307,6 +343,9 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
   .card{padding:16px}
   .card h3{font-size:14px}
   .card p{font-size:12px}
+  
+  .features-grid{grid-template-columns:1fr}
+  .capabilities-list{grid-template-columns:1fr}
   
   .term-head{padding:6px 10px;font-size:9px}
   .term pre{padding:10px;font-size:10px}
@@ -346,6 +385,16 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
   .card h3{font-size:13px}
   .card p{font-size:11px}
   
+  .features-grid{gap:10px}
+  .feature-card{padding:14px}
+  .feature-card .icon{font-size:24px}
+  .feature-card h4{font-size:12px}
+  .feature-card p{font-size:11px}
+  
+  .capabilities-list{gap:10px}
+  .capability-item{padding:12px}
+  .capability-item span{font-size:11px}
+  
   .term-grid{gap:12px}
   .steps li{font-size:11px;padding:7px 0 7px 22px}
   
@@ -361,13 +410,13 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
   <div class="topbar-inner">
     <div class="brand">
       <img src="SSCGRAM-logo.svg" alt="SSCGRAM Logo" title="SSCGRAM PDF Toolkit">
-      <span>PDF•toolkit</span>
+      <span>toolkit</span>
     </div>
     <button class="menu-toggle" onclick="toggleMenu()">☰</button>
     <div class="navlinks" id="navMenu">
-      <a href="#modules">modules</a>
+      <a href="#features">features</a>
+      <a href="#capabilities">capabilities</a>
       <a href="#guide">guide</a>
-      <a href="#structure">structure</a>
       <a href="#github">github</a>
     </div>
   </div>
@@ -423,11 +472,131 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
   </div>
 </div>
 
+<section id="features">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-tag">why choose sscgram pdf toolkit</div>
+      <h2>Powerful <span class="gold">Features</span></h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="icon">🚫</span>
+        <h4>No Page Limits</h4>
+        <p>Convert unlimited pages without restrictions</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🚀</span>
+        <h4>Fast Processing</h4>
+        <p>Lightning-fast conversions in seconds</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🔒</span>
+        <h4>100% Private</h4>
+        <p>Your files never leave your computer</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">💻</span>
+        <h4>Client-Side</h4>
+        <p>All processing happens in your browser</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🌐</span>
+        <h4>Works Offline</h4>
+        <p>No internet connection required</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🚫</span>
+        <h4>No Uploads</h4>
+        <p>Files stay on your device always</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">💧</span>
+        <h4>No Watermarks</h4>
+        <p>Clean PDFs without any branding</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🆓</span>
+        <h4>Completely Free</h4>
+        <p>No hidden charges, forever free</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">📱</span>
+        <h4>Cross-Platform</h4>
+        <p>Works on desktop, tablet, and mobile</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">⭐</span>
+        <h4>Open Source</h4>
+        <p>Transparent code on GitHub</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="capabilities">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-tag">what you can do</div>
+      <h2>Supported <span class="gold">Capabilities</span></h2>
+    </div>
+    <div class="capabilities-list">
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Image → PDF</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Split PDF</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Merge PDF</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>PDF → Image</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Add Header</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Add Footer</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Add Watermarks</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Add Margins</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Reorder Pages</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Rotate Pages</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Compress PDF</span>
+      </div>
+      <div class="capability-item">
+        <span class="check">✅</span>
+        <span>Batch Convert</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="modules">
   <div class="container">
     <div class="section-head">
       <div class="section-tag">open modules</div>
-      <h2>Application <span class="gold">modules</span></h2>
+      <h2>Application <span class="gold">Modules</span></h2>
     </div>
     <div class="grid">
       <div class="card">
@@ -456,7 +625,7 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
   <div class="container">
     <div class="section-head">
       <div class="section-tag">setup</div>
-      <h2>Project <span class="gold">guide</span></h2>
+      <h2>Project <span class="gold">Guide</span></h2>
     </div>
     <div class="term-grid">
       <div class="term">
@@ -484,7 +653,7 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
   <div class="container">
     <div class="section-head">
       <div class="section-tag">tree -L 3</div>
-      <h2>Project <span class="gold">structure</span></h2>
+      <h2>Project <span class="gold">Structure</span></h2>
     </div>
     <div class="tree">
 .<br>
@@ -508,7 +677,7 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
   <div class="container">
     <div class="section-head">
       <div class="section-tag">remote origin</div>
-      <h2>GitHub <span class="gold">repository</span></h2>
+      <h2>GitHub <span class="gold">Repository</span></h2>
     </div>
     <div class="gh-card">
       <div>
