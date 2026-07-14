@@ -24,6 +24,7 @@ No uploads. No backend. No tracking. Just open the page and go.
 - [Live Demo](#-live-demo)
 - [Quick Start](#-quick-start)
 - [Deploy to GitHub Pages](#-deploy-to-github-pages)
+- [Modules](#-modules)
 - [Project Structure](#-project-structure)
 - [Privacy Model](#-privacy-model)
 - [Tech Stack](#-tech-stack)
@@ -39,37 +40,9 @@ Most "free PDF tool" websites quietly upload your files to a server first. This 
 ---
 
 ## 🧩 Modules
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### 📄 `image-to-pdf.html`
-Turn JPG, PNG, JPEG or WEBP images into a clean PDF.
-
-- Auto-corrects EXIF rotation from phone cameras
-- Custom page size & orientation
-- Headers, footers, and page titles
-- Text or image watermarks with adjustable opacity
-
-**[→ Open module](image-to-pdf.html)**
-
-</td>
-<td width="50%" valign="top">
-
-### ⚡ `split-merge-pdftoimage.html`
-Split, merge, reorder, and export PDF pages.
-
-- Drag-and-drop page reordering
-- Rotate any page in 90° steps
-- Split by custom ranges — e.g. `1-4, 7, 11-15`
-- Export selected pages back to images, zipped
-
-**[→ Launch toolkit](split-merge-pdftoimage.html)**
-
-</td>
-</tr>
-</table>
+- **Image to PDF**: Convert images to PDF with EXIF-based rotation, custom margins, headers, footers, and watermarks.
+- **Split & Merge**: Reorder, rotate, merge, split, and export PDF pages as images.
+- **Live Preview**: All tools feature a **Before/After live preview** in the lightbox modal to visualize margins, watermarks, and headers before generating.
 
 ---
 
@@ -88,7 +61,7 @@ Run it locally in three lines:
 ```bash
 git clone https://github.com/sscgram/PDF-toolkit.git
 cd PDF-toolkit
-open index.html          # or use VS Code's "Live Server" extension
+index.html          # or use VS Code's "Live Server" extension, direct open index.html in browser
 ```
 
 That's it — no `npm install`, no build step, no dependencies to fetch.
@@ -112,11 +85,20 @@ Your toolkit will be live at `https://<your-username>.github.io/<repo-name>/` wi
 ├── .github/
 │   └── workflows/
 │       └── static.yml               # GitHub Pages deployment workflow
+├── assets/                          # Global CSS, JS, and Images
+│   ├── css/
+│   │   ├── components.css           # UI components
+│   │   ├── layout.css               # Responsive grid/layout
+│   │   └── theme.css                # Global CSS variables
+│   └── js/
+│       ├── common.js                # Shared utilities (toast/busy)
+│       └── ui.js                    # Header/Footer injection
+├── tools/                           # PDF Modules
+│   ├── image-to-pdf.html            # Image to PDF Tool
+│   └── split-merge-pdftoimage.html  # Split/Merge Tool
+├── index.html                       # Landing page
 ├── LICENSE                          # MIT License
-├── README.md                        # You are here
-├── image-to-pdf.html                # Image → PDF module
-├── split-merge-pdftoimage.html      # Split · Merge · Export module
-└── index.html                       # Landing page & docs
+└── README.md                        # Project documentation
 ```
 
 ---
