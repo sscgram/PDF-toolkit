@@ -6,153 +6,103 @@
 <meta name="description" content="SSCGRAM PDF Toolkit - Free online PDF converter & editor. Convert images to PDF, split, merge, watermark, add headers/footers. 100% client-side, no uploads, completely private.">
 <meta name="keywords" content="PDF toolkit, image to PDF, PDF splitter, PDF merger, watermark PDF, PDF header footer, online PDF editor, free PDF tools, PDF converter">
 <meta name="author" content="SSCGRAM">
-<meta name="theme-color" content="#d97706">
+<meta name="theme-color" content="#F59E0B">
 <meta property="og:title" content="SSCGRAM PDF Toolkit - Free Online PDF Tools">
 <meta property="og:description" content="Convert images to PDF, split & merge documents, add watermarks, headers & footers. 100% client-side, no tracking, completely free.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://raw.githubusercontent.com/sscgram/PDF-toolkit/main/SSCGRAM-LOGO.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/sscgram/PDF-toolkit/main/assets/images/SSCGRAM-LOGO.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="SSCGRAM PDF Toolkit">
 <meta name="twitter:description" content="Free online PDF tools - Convert, Split, Merge, Watermark PDFs instantly">
 <title>SSCGRAM PDF Toolkit - Free Online PDF Converter & Editor | Split, Merge, Watermark</title>
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
+<link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/components.css">
 <style>
+/* Extra token used only on this page (code-syntax highlight color) — everything
+   else (bg/surface/border/text/text-muted/accent/info/success/font-*) comes
+   from assets/css/theme.css, the single source of truth for the toolkit. */
 :root{
-  --bg:#f8f9fa;
-  --panel:#ffffff;
-  --panel-2:#f5f6f8;
-  --border:#e0e3e8;
-  --text:#1a1d23;
-  --muted:#6b7280;
-  --gold:#d97706;
-  --cyan:#0891b2;
   --pink:#db2777;
-  --green:#059669;
-  --red:#dc2626;
-  --mono:'JetBrains Mono',monospace;
-  --sans:'Inter',sans-serif;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important;transition:none !important}
 }
 body{
   background:
-    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(217,119,6,.04), transparent 60%),
-    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(8,145,178,.04), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 15% -5%, rgba(245,158,11,.05), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(59,130,246,.04), transparent 60%),
     var(--bg);
-  color:var(--text);
-  font-family:var(--sans);
-  line-height:1.6;
 }
 .container{max-width:1160px;margin:auto;padding:0 24px}
-a{color:inherit}
-
-/* ---------- NAV ---------- */
-.topbar{
-  position:sticky;top:0;z-index:50;
-  background:rgba(248,249,250,.95);
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--border);
-}
-.topbar-inner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;max-width:1160px;margin:auto}
-.brand{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--gold);display:flex;align-items:center;gap:10px}
-.brand img{height:40px;width:auto;object-fit:contain}
-.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px rgba(5,150,105,.4);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.navlinks{display:flex;gap:16px;font-family:var(--mono);font-size:12px}
-.navlinks a{color:var(--muted);text-decoration:none;transition:color .2s;white-space:nowrap}
-.navlinks a:hover{color:var(--gold)}
-.navlinks a::before{content:'// ';color:var(--border)}
-
-/* ---------- HAMBURGER MENU ---------- */
-.menu-toggle{
-  display:none;background:none;border:none;color:var(--text);cursor:pointer;font-size:24px;padding:8px;line-height:1;
-}
-.menu-toggle:hover{color:var(--gold)}
-
-@media(max-width:640px){
-  .navlinks{
-    position:fixed;top:50px;left:0;right:0;background:white;border-bottom:1px solid var(--border);flex-direction:column;gap:0;
-    display:none;z-index:49;padding:16px;box-shadow:0 4px 8px rgba(0,0,0,.08)
-  }
-  .navlinks.active{display:flex}
-  .navlinks a{padding:12px 0;border-bottom:1px solid var(--border)}
-  .navlinks a:last-child{border-bottom:none}
-  .menu-toggle{display:block}
-  .brand{font-size:14px}
-  .brand img{height:32px}
-}
 
 /* ---------- HERO ---------- */
 header{padding:50px 0 30px}
 .eyebrow{
-  font-family:var(--mono);font-size:11px;color:var(--cyan);
+  font-family:var(--font-mono);font-size:11px;color:var(--info);
   display:inline-flex;align-items:center;gap:6px;
   border:1px solid var(--border);padding:6px 10px;border-radius:6px;margin-bottom:18px;
 }
 .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:30px;align-items:start}
-h1.title{font-family:var(--mono);font-size:40px;font-weight:800;line-height:1.2;letter-spacing:-.5px}
+h1.title{font-family:var(--font-mono);font-size:40px;font-weight:800;line-height:1.2;letter-spacing:-.5px}
 h1.title .kw{color:var(--pink)}
-h1.title .str{color:var(--green)}
-h1.title .fn{color:var(--cyan)}
-h1.title .cmt{color:var(--muted);font-weight:400;font-size:.5em;display:block;margin-top:6px}
-.lede{margin:18px 0 22px;color:var(--muted);font-size:15px;max-width:52ch}
+h1.title .str{color:var(--success)}
+h1.title .fn{color:var(--info)}
+h1.title .cmt{color:var(--text-muted);font-weight:400;font-size:.5em;display:block;margin-top:6px}
+.lede{margin:18px 0 22px;color:var(--text-muted);font-size:15px;max-width:52ch}
 .cta-row{display:flex;flex-wrap:wrap;gap:10px}
 .btn{
   display:inline-flex;align-items:center;gap:6px;
   padding:11px 16px;border-radius:6px;text-decoration:none;
-  font-family:var(--mono);font-weight:600;font-size:13px;
+  font-family:var(--font-mono);font-weight:600;font-size:13px;
   transition:transform .15s ease, box-shadow .15s ease;
 }
 .btn:hover{transform:translateY(-2px)}
-.primary{background:var(--gold);color:#fff;box-shadow:0 0 0 rgba(217,119,6,0)}
+.primary{background:var(--accent);color:#fff;box-shadow:0 0 0 rgba(217,119,6,0)}
 .primary:hover{box-shadow:0 8px 24px rgba(217,119,6,.2)}
 .secondary{border:1px solid var(--border);color:var(--text)}
-.secondary:hover{border-color:var(--cyan);color:var(--cyan)}
+.secondary:hover{border-color:var(--info);color:var(--info)}
 
 /* ---------- EDITOR WINDOW ---------- */
 .window{
-  background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
   overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.08);
 }
 .window-bar{
   display:flex;align-items:center;gap:12px;padding:8px 12px;
-  background:var(--panel-2);border-bottom:1px solid var(--border);
+  background:var(--surface-2);border-bottom:1px solid var(--border);
 }
 .dots{display:flex;gap:6px}
 .dots span{width:9px;height:9px;border-radius:50%;display:block}
 .dots span:nth-child(1){background:#ff5f56}
 .dots span:nth-child(2){background:#ffbd2e}
 .dots span:nth-child(3){background:#27c93f}
-.tabs{display:flex;gap:2px;font-family:var(--mono);font-size:11px;overflow-x:auto}
+.tabs{display:flex;gap:2px;font-family:var(--font-mono);font-size:11px;overflow-x:auto}
 .tab{
-  padding:5px 10px;color:var(--muted);white-space:nowrap;border-radius:5px 5px 0 0;
+  padding:5px 10px;color:var(--text-muted);white-space:nowrap;border-radius:5px 5px 0 0;
   cursor:default;border-bottom:2px solid transparent;font-size:10px;
 }
-.tab.active{color:var(--gold);background:var(--bg);border-bottom:2px solid var(--gold)}
-.editor-body{padding:15px 16px;font-family:var(--mono);font-size:11px;min-height:180px;overflow-x:auto}
+.tab.active{color:var(--accent);background:var(--bg);border-bottom:2px solid var(--accent)}
+.editor-body{padding:15px 16px;font-family:var(--font-mono);font-size:11px;min-height:180px;overflow-x:auto}
 .editor-body .ln{color:var(--border);display:inline-block;width:20px;user-select:none}
 #typed-code{white-space:pre-wrap;word-break:break-word}
-.cursor{display:inline-block;width:7px;background:var(--gold);animation:blink 1s step-end infinite;margin-left:1px}
+.cursor{display:inline-block;width:7px;background:var(--accent);animation:blink 1s step-end infinite;margin-left:1px}
 @keyframes blink{50%{opacity:0}}
 .tok-kw{color:var(--pink)}
-.tok-fn{color:var(--cyan)}
-.tok-str{color:var(--green)}
-.tok-cmt{color:var(--muted)}
-.tok-var{color:var(--gold)}
+.tok-fn{color:var(--info)}
+.tok-str{color:var(--success)}
+.tok-cmt{color:var(--text-muted)}
+.tok-var{color:var(--accent)}
 
 .preview-window{margin-top:15px}
-.preview-body{padding:15px 16px;font-family:var(--mono);font-size:11px;color:var(--muted);min-height:100px;overflow-x:auto}
+.preview-body{padding:15px 16px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);min-height:100px;overflow-x:auto}
 .preview-body .line{opacity:0;transform:translateY(4px);animation:rise .4s ease forwards}
 @keyframes rise{to{opacity:1;transform:none}}
-.preview-body .ok{color:var(--green)}
+.preview-body .ok{color:var(--success)}
 .preview-thumbs{display:flex;gap:8px;margin-top:12px;opacity:0;overflow-x:auto}
 .preview-thumbs.show{opacity:1;transition:opacity .5s ease}
 .thumb{
@@ -165,7 +115,7 @@ h1.title .cmt{color:var(--muted);font-weight:400;font-size:.5em;display:block;ma
 /* ---------- STATS STRIP ---------- */
 .stat-strip{
   border-top:1px solid var(--border);border-bottom:1px solid var(--border);
-  background:var(--panel);
+  background:var(--surface);
 }
 .stat-inner{
   max-width:1160px;margin:auto;padding:0 16px;
@@ -173,46 +123,46 @@ h1.title .cmt{color:var(--muted);font-weight:400;font-size:.5em;display:block;ma
 }
 .stat-cell{
   padding:20px 14px;text-align:center;border-right:1px solid var(--border);
-  font-family:var(--mono);
+  font-family:var(--font-mono);
 }
 .stat-cell:last-child{border-right:none}
-.stat-cell b{display:block;font-size:22px;color:var(--gold)}
-.stat-cell small{color:var(--muted);font-size:11px}
+.stat-cell b{display:block;font-size:22px;color:var(--accent)}
+.stat-cell small{color:var(--text-muted);font-size:11px}
 
 /* ---------- SECTIONS ---------- */
 section{padding:60px 0}
 .section-head{margin-bottom:36px}
-.section-tag{font-family:var(--mono);font-size:11px;color:var(--cyan)}
+.section-tag{font-family:var(--font-mono);font-size:11px;color:var(--info)}
 .section-tag::before{content:'$ '}
-h2{font-family:var(--mono);font-size:26px;margin-top:8px;font-weight:700;line-height:1.3}
-h2 .gold{color:var(--gold)}
+h2{font-family:var(--font-mono);font-size:26px;margin-top:8px;font-weight:700;line-height:1.3}
+h2 .gold{color:var(--accent)}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
 .card{
-  background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
   padding:20px;transition:border-color .2s ease, transform .2s ease;
 }
-.card:hover{border-color:var(--gold);transform:translateY(-3px)}
+.card:hover{border-color:var(--accent);transform:translateY(-3px)}
 .card .file-icon{
-  font-family:var(--mono);font-size:11px;color:#fff;background:var(--gold);
+  font-family:var(--font-mono);font-size:11px;color:#fff;background:var(--accent);
   display:inline-block;padding:3px 7px;border-radius:3px;margin-bottom:12px;font-weight:700;
 }
-.card .file-icon.alt{background:var(--cyan);color:#fff}
-.card .file-icon.doc{background:var(--muted);color:#fff}
-.card h3{font-family:var(--mono);font-size:15px;margin-bottom:9px}
-.card p{color:var(--muted);font-size:13px;margin-bottom:15px}
+.card .file-icon.alt{background:var(--info);color:#fff}
+.card .file-icon.doc{background:var(--text-muted);color:#fff}
+.card h3{font-family:var(--font-mono);font-size:15px;margin-bottom:9px}
+.card p{color:var(--text-muted);font-size:13px;margin-bottom:15px}
 .card a.open{
-  font-family:var(--mono);font-size:12px;color:var(--gold);text-decoration:none;
-  border-bottom:1px dashed var(--gold);
+  font-family:var(--font-mono);font-size:12px;color:var(--accent);text-decoration:none;
+  border-bottom:1px dashed var(--accent);
 }
 
 /* ---------- WHY CHOOSE SECTION ---------- */
 .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
 .feature-card{
-  background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;
   text-align:center;transition:all .2s ease;display:flex;flex-direction:column;align-items:center;
 }
-.feature-card:hover{border-color:var(--gold);box-shadow:0 8px 24px rgba(217,119,6,.12);transform:translateY(-4px)}
+.feature-card:hover{border-color:var(--accent);box-shadow:0 8px 24px rgba(217,119,6,.12);transform:translateY(-4px)}
 .feature-card .icon{font-size:28px;margin-bottom:10px;display:block;animation:float 3s ease-in-out infinite}
 .feature-card:nth-child(2) .icon{animation-delay:.2s}
 .feature-card:nth-child(3) .icon{animation-delay:.4s}
@@ -224,75 +174,68 @@ h2 .gold{color:var(--gold)}
 .feature-card:nth-child(9) .icon{animation-delay:1.6s}
 .feature-card:nth-child(10) .icon{animation-delay:1.8s}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.feature-card h4{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);margin:0 0 6px}
-.feature-card p{font-size:12px;color:var(--muted);margin:0;line-height:1.5}
+.feature-card h4{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--text);margin:0 0 6px}
+.feature-card p{font-size:12px;color:var(--text-muted);margin:0;line-height:1.5}
 
 /* ---------- CAPABILITIES SECTION ---------- */
 .capabilities-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
 .capability-item{
-  background:linear-gradient(135deg,var(--panel) 0%,var(--panel-2) 100%);
+  background:linear-gradient(135deg,var(--surface) 0%,var(--surface-2) 100%);
   border:1px solid var(--border);border-radius:8px;padding:14px;
   display:flex;align-items:center;gap:10px;transition:.2s ease;
 }
-.capability-item:hover{border-color:var(--gold);transform:translateX(4px);background:linear-gradient(135deg,#fff9f0 0%,var(--panel) 100%)}
+.capability-item:hover{border-color:var(--accent);transform:translateX(4px);background:linear-gradient(135deg,#fff9f0 0%,var(--surface) 100%)}
 .capability-item .check{
-  font-size:18px;color:var(--green);font-weight:bold;flex-shrink:0;
+  font-size:18px;color:var(--success);font-weight:bold;flex-shrink:0;
 }
-.capability-item span{font-family:var(--mono);font-size:12px;color:var(--text);font-weight:600}
+.capability-item span{font-family:var(--font-mono);font-size:12px;color:var(--text);font-weight:600}
 
 /* ---------- TERMINAL COMMAND BLOCKS ---------- */
 .term{
   background:#f5f6f8;border:1px solid var(--border);border-radius:8px;
-  font-family:var(--mono);font-size:12px;overflow:hidden;
+  font-family:var(--font-mono);font-size:12px;overflow:hidden;
 }
 .term-head{
   display:flex;justify-content:space-between;align-items:center;
-  padding:8px 12px;background:var(--panel-2);border-bottom:1px solid var(--border);
-  font-size:10px;color:var(--muted);
+  padding:8px 12px;background:var(--surface-2);border-bottom:1px solid var(--border);
+  font-size:10px;color:var(--text-muted);
 }
 .copy-btn{
-  background:transparent;border:1px solid var(--border);color:var(--muted);
-  font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer;
+  background:transparent;border:1px solid var(--border);color:var(--text-muted);
+  font-family:var(--font-mono);font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer;
   transition:.2s;
 }
-.copy-btn:hover{border-color:var(--gold);color:var(--gold)}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
 .term pre{padding:12px;overflow-x:auto;color:var(--text);font-size:11px}
-.term pre .p{color:var(--green)}
+.term pre .p{color:var(--success)}
 .term-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
 
-.steps{list-style:none;font-family:var(--mono);font-size:13px}
-.steps li{padding:9px 0 9px 26px;position:relative;border-bottom:1px solid var(--border);color:var(--muted)}
+.steps{list-style:none;font-family:var(--font-mono);font-size:13px}
+.steps li{padding:9px 0 9px 26px;position:relative;border-bottom:1px solid var(--border);color:var(--text-muted)}
 .steps li:last-child{border-bottom:none}
-.steps li::before{content:'→';position:absolute;left:0;color:var(--cyan)}
+.steps li::before{content:'→';position:absolute;left:0;color:var(--info)}
 .steps li b{color:var(--text)}
 
 /* ---------- STRUCTURE TREE ---------- */
 .tree{
-  font-family:var(--mono);font-size:12px;background:#f5f6f8;border:1px solid var(--border);
-  border-radius:8px;padding:16px 20px;color:var(--muted);line-height:1.8;overflow-x:auto;
+  font-family:var(--font-mono);font-size:12px;background:#f5f6f8;border:1px solid var(--border);
+  border-radius:8px;padding:16px 20px;color:var(--text-muted);line-height:1.8;overflow-x:auto;
 }
-.tree .dir{color:var(--cyan)}
+.tree .dir{color:var(--info)}
 .tree .file{color:var(--text)}
-.tree .yml{color:var(--gold)}
+.tree .yml{color:var(--accent)}
 
 /* ---------- GITHUB ---------- */
 .gh-card{
-  background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
   padding:24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
 }
-.gh-card code{font-family:var(--mono);color:var(--gold);font-size:12px;word-break:break-all}
+.gh-card code{font-family:var(--font-mono);color:var(--accent);font-size:12px;word-break:break-all}
 .star{
-  font-family:var(--mono);border:1px solid var(--border);padding:9px 14px;border-radius:6px;
+  font-family:var(--font-mono);border:1px solid var(--border);padding:9px 14px;border-radius:6px;
   color:var(--text);text-decoration:none;transition:.2s;font-size:12px;white-space:nowrap;
 }
-.star:hover{border-color:var(--gold);color:var(--gold)}
-
-footer{
-  border-top:1px solid var(--border);padding:30px 0;text-align:center;
-  font-family:var(--mono);color:var(--muted);font-size:12px;
-}
-footer .prompt{color:var(--green)}
-footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
+.star:hover{border-color:var(--accent);color:var(--accent)}
 
 /* ---------- MOBILE RESPONSIVE ---------- */
 @media(max-width:860px){
@@ -310,10 +253,6 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
 }
 
 @media(max-width:640px){
-  .topbar-inner{padding:10px 12px}
-  .brand{font-size:13px}
-  .brand img{height:28px}
-  
   header{padding:40px 0 20px}
   .eyebrow{font-size:10px;margin-bottom:14px}
   h1.title{font-size:26px;line-height:1.3}
@@ -357,16 +296,10 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
   .gh-card{padding:18px;gap:12px}
   .gh-card code{font-size:11px}
   .star{padding:8px 12px;font-size:11px}
-  
-  footer{padding:20px 0;font-size:11px}
 }
 
 @media(max-width:480px){
   .container{padding:0 16px}
-  .topbar-inner{padding:8px 12px}
-  .brand{font-size:12px}
-  .brand img{height:24px}
-  
   header{padding:30px 0 15px}
   h1.title{font-size:22px;letter-spacing:0}
   .lede{font-size:13px;margin:10px 0 12px}
@@ -406,22 +339,6 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-inner">
-    <div class="brand">
-      <img src="SSCGRAM-logo.svg" alt="SSCGRAM Logo" title="SSCGRAM PDF Toolkit">
-      <span>toolkit</span>
-    </div>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    <div class="navlinks" id="navMenu">
-      <a href="#features">features</a>
-      <a href="#capabilities">capabilities</a>
-      <a href="#guide">guide</a>
-      <a href="#github">github</a>
-    </div>
-  </div>
-</div>
-
 <header>
   <div class="container">
     <span class="eyebrow">● running in your browser — no server, no uploads</span>
@@ -433,8 +350,8 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
         </h1>
         <p class="lede">Convert images to PDF, split & merge documents, reorder pages and export them back to images — every byte stays on your machine. Open a file, watch it render live, download the result.</p>
         <div class="cta-row">
-          <a class="btn primary" href="image-to-pdf.html">📄 Image → PDF</a>
-          <a class="btn secondary" href="split-merge-pdftoimage.html">⚡ Split · Merge · Export</a>
+          <a class="btn primary" href="tools/image-to-pdf.html">📄 Image → PDF</a>
+          <a class="btn secondary" href="tools/split-merge-pdftoimage.html">⚡ Split · Merge · Export</a>
           <a class="btn secondary" href="https://github.com/sscgram/PDF-toolkit" target="_blank" rel="noopener noreferrer">⭐ GitHub</a>
         </div>
       </div>
@@ -603,13 +520,13 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
         <span class="file-icon">.html</span>
         <h3>image-to-pdf.html</h3>
         <p>Build PDFs from JPG, PNG and WEBP images with page sizing, watermarks, headers and footers — rendered live on canvas as you configure it.</p>
-        <a class="open" href="image-to-pdf.html">open module →</a>
+        <a class="open" href="tools/image-to-pdf.html">open module →</a>
       </div>
       <div class="card">
         <span class="file-icon alt">.html</span>
         <h3>split-merge-pdftoimage.html</h3>
         <p>Split, merge, rotate and reorder pages with drag-and-drop, then export selected pages straight back to image files.</p>
-        <a class="open" href="split-merge-pdftoimage.html">launch toolkit →</a>
+        <a class="open" href="tools/split-merge-pdftoimage.html">launch toolkit →</a>
       </div>
       <div class="card">
         <span class="file-icon doc">.md</span>
@@ -632,10 +549,10 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
         <div class="term-head"><span>install.sh</span><button class="copy-btn" onclick="copyCmd(this,'git clone https://github.com/sscgram/PDF-toolkit.git')">copy</button></div>
         <pre><span class="p">$</span> git clone https://github.com/sscgram/PDF-toolkit.git
 <span class="p">$</span> cd PDF-toolkit
-<span class="p">$</span> open index.html   <span style="color:var(--muted)"># or VS Code</span></pre>
+<span class="p">$</span> open index.html   <span style="color:var(--text-muted)"># or VS Code</span></pre>
       </div>
       <div class="term">
-        <div class="term-head"><span>deploy.sh</span><span style="color:var(--muted)">github pages</span></div>
+        <div class="term-head"><span>deploy.sh</span><span style="color:var(--text-muted)">github pages</span></div>
         <div style="padding:6px 12px">
         <ul class="steps">
           <li><b>Settings → Pages</b> → set source to GitHub Actions</li>
@@ -660,15 +577,16 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
 ├── <span class="dir">.github/</span><br>
 │ └── <span class="dir">workflows/</span><br>
 │ &nbsp;&nbsp;└── <span class="yml">static.yml</span><br>
+├── <span class="dir">assets/</span><br>
+│ ├── <span class="dir">css/</span> <span class="file">theme.css, layout.css, components.css</span><br>
+│ ├── <span class="dir">js/</span> <span class="file">common.js, ui.js</span><br>
+│ └── <span class="dir">images/</span> <span class="file">SSCGRAM-logo.svg, favicon.ico</span><br>
+├── <span class="dir">tools/</span><br>
+│ ├── <span class="file">image-to-pdf.html</span><br>
+│ └── <span class="file">split-merge-pdftoimage.html</span><br>
 ├── LICENSE<br>
 ├── README.md<br>
-├── index.html<br>
-├── image-to-pdf.html<br>
-├── split-merge-pdftoimage.html<br>
-├── SSCGRAM-logo.svg<br>
-├── SSCGRAM-LOGO.png<br>
-├── favicon.ico<br>
-└── apple-touch-icon.png
+└── index.html
     </div>
   </div>
 </section>
@@ -682,34 +600,20 @@ footer .prompt::after{content:'_';animation:blink 1s step-end infinite}
     <div class="gh-card">
       <div>
         <code>github.com/sscgram/PDF-toolkit</code>
-        <p style="color:var(--muted);margin-top:8px;font-size:12px">MIT licensed · issues and PRs welcome.</p>
+        <p style="color:var(--text-muted);margin-top:8px;font-size:12px">MIT licensed · issues and PRs welcome.</p>
       </div>
       <a class="star" href="https://github.com/sscgram/PDF-toolkit" target="_blank" rel="noopener noreferrer">⭐ Star this repo</a>
     </div>
   </div>
 </section>
 
-<footer>
-  <div class="container">
-    <p>Made with HTML5, JavaScript, PDF.js &amp; jsPDF · MIT License · v1.0.0</p>
-    <p style="margin-top:10px"><span class="prompt">sscgram@toolkit:~$</span></p>
-  </div>
-</footer>
+<script src="assets/js/common.js"></script>
+<script src="assets/js/ui.js"></script>
+<script>
+initUI({ toolName: '', rootPath: './' });
+</script>
 
 <script>
-// ---- hamburger menu toggle ----
-function toggleMenu(){
-  const menu = document.getElementById('navMenu');
-  menu.classList.toggle('active');
-}
-
-// close menu when link is clicked
-document.querySelectorAll('.navlinks a').forEach(link => {
-  link.addEventListener('click', () => {
-    document.getElementById('navMenu').classList.remove('active');
-  });
-});
-
 // ---- live typing animation ----
 const codeLines = [
   {t:'kw', v:'function '}, {t:'fn', v:'renderPDF'}, {t:'plain', v:'(images) {\n  '},

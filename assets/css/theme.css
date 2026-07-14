@@ -1,0 +1,48 @@
+/* ============================================================
+   THEME — single source of truth for all design tokens
+   Edit only this file to restyle the entire toolkit.
+   ============================================================ */
+:root {
+  /* Background */
+  --bg:          #F3F4F6;
+  --bg-soft:     #EAECF0;
+  --surface:     #FFFFFF;
+  --surface-2:   #F9FAFB;
+
+  /* Text */
+  --text:        #111827;
+  --text-muted:  #6B7280;
+  --text-light:  #9CA3AF;
+
+  /* Brand */
+  --accent:      #F59E0B;
+  --accent-dark: #D97706;
+  --accent-soft: #FEF3C7;
+
+  /* Status */
+  --success:     #22C55E;
+  --danger:      #EF4444;
+  --info:        #3B82F6;
+
+  /* Borders */
+  --border:      #E5E7EB;
+  --border-dark: #D1D5DB;
+
+  /* Shadows */
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.08);
+  --shadow:      0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:   0 10px 30px rgba(0,0,0,.10);
+
+  /* Shape */
+  --radius-sm:   6px;
+  --radius:      10px;
+  --radius-lg:   16px;
+
+  /* Typography */
+  --font-sans:   'Inter', system-ui, sans-serif;
+  --font-mono:   'JetBrains Mono', monospace;
+
+  /* Layout */
+  --sidebar-w:   320px;
+  --topbar-h:    60px;
+}

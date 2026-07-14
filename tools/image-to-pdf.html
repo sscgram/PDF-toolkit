@@ -1,598 +1,441 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Image to PDF — SSCGRAM</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="description" content="Convert JPG, PNG, WEBP images to PDF — 100% client-side, no uploads.">
+<title>Image to PDF — SSCGRAM PDF Toolkit</title>
+<link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/components.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<style>
-  :root{
-    --bg:#E7E9E1;
-    --bg-soft:#DFE2D8;
-    --panel:#FFFFFF;
-    --ink:#1E2A22;
-    --muted:#647063;
-    --line:#C9CFC0;
-    --line-soft:#D9DECD;
-    --accent:#2B5C4B;
-    --accent-dark:#183D31;
-    --accent-soft:#E1EAE4;
-    --stamp:#B23A2E;
-    --stamp-soft:#F4E4DF;
-    --radius:10px;
-    --font-display:'Fraunces',serif;
-    --font-body:'Inter',system-ui,sans-serif;
-    --font-mono:'JetBrains Mono',monospace;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;height:100%;}
-  body{
-    background:var(--bg);
-    background-image: radial-gradient(circle at 1px 1px, rgba(30,42,34,0.06) 1px, transparent 0);
-    background-size:22px 22px;
-    color:var(--ink);
-    font-family:var(--font-body);
-    height:100%;
-    overflow:hidden;
-  }
-  a{color:inherit;text-decoration:none;}
-  button{font-family:inherit;cursor:pointer;}
-  ::selection{background:var(--stamp-soft);}
-
-  .sidebar-scroll,.workspace-scroll{scrollbar-width:thin;scrollbar-color:var(--line) transparent;}
-  .sidebar-scroll::-webkit-scrollbar,.workspace-scroll::-webkit-scrollbar{width:8px;}
-  .sidebar-scroll::-webkit-scrollbar-thumb,.workspace-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px;}
-  .sidebar-scroll::-webkit-scrollbar-thumb:hover,.workspace-scroll::-webkit-scrollbar-thumb:hover{background:var(--accent);}
-  
-  .app{max-width:1400px;margin:0 auto;padding:20px 20px 0;height:100%;display:flex;flex-direction:column;}
-
-  .topbar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 4px 22px;flex-wrap:wrap;}
-  .brand{display:flex;align-items:center;gap:14px;}
-  .stamp-mark{width:56px;height:56px;flex-shrink:0;transform:rotate(-7deg);}
-  .brand-text h1{font-family:var(--font-display);font-weight:700;font-size:22px;margin:0;letter-spacing:.2px;color:var(--accent-dark);}
-  .brand-text p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-family:var(--font-mono);}
-  
-  .top-actions{display:flex;gap:10px;flex-wrap:wrap;}
-  .btn{
-    border:1px solid var(--line);background:var(--panel);color:var(--ink);
-    padding:9px 16px;border-radius:999px;font-size:13.5px;font-weight:600;
-    display:inline-flex;align-items:center;gap:7px;transition:.15s;
-  }
-  .btn:hover{border-color:var(--accent);color:var(--accent-dark);}
-  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .btn.primary:hover{background:var(--accent-dark);border-color:var(--accent-dark);color:#fff;}
-  .btn.ghost{background:transparent;border-color:transparent;color:var(--muted);padding:8px 10px;}
-  .btn.ghost:hover{color:var(--stamp);}
-  .btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none;}
-  .btn.sm{padding:6px 12px;font-size:12.5px;}
-
-  .layout{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;}
-  .sidebar-scroll{height:100%;overflow-y:auto;padding:2px 6px 24px 2px;}
-  .workspace-scroll{height:100%;overflow-y:auto;padding:2px 2px 24px;}
-  @media (max-width:980px){
-    body{height:auto;overflow:visible;}
-    .app{height:auto;}
-    .layout{grid-template-columns:1fr;height:auto;}
-    .sidebar-scroll,.workspace-scroll{height:auto;overflow-y:visible;}
-  }
-
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 18px;margin-bottom:16px;}
-  .panel h2{font-family:var(--font-display);font-size:15px;font-weight:600;margin:0 0 4px;color:var(--accent-dark);display:flex;align-items:center;gap:8px;}
-  .panel h2 .num{
-    font-family:var(--font-mono);font-size:10.5px;color:var(--stamp);border:1px solid var(--stamp);
-    border-radius:999px;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;
-  }
-  .panel .hint{font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5;}
-
-  .dropzone{
-    border:1.5px dashed var(--line);border-radius:var(--radius);padding:26px 14px;
-    text-align:center;cursor:pointer;transition:.15s;background:var(--bg-soft);
-  }
-  .dropzone:hover,.dropzone.drag{border-color:var(--accent);background:var(--accent-soft);}
-  .dropzone svg{width:30px;height:30px;color:var(--accent);margin-bottom:8px;}
-  .dropzone p{margin:0;font-size:13px;color:var(--ink);font-weight:600;}
-  .dropzone span{display:block;margin-top:4px;font-size:11.5px;color:var(--muted);}
-  input[type=file]{display:none;}
-
-  .field{margin-bottom:12px;}
-  .field label{display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px;}
-  .field .row{display:flex;gap:8px;}
-  .field input[type=text],.field input[type=number],.field select{
-    width:100%;border:1px solid var(--line);border-radius:7px;padding:8px 10px;
-    font-family:var(--font-body);font-size:13px;background:#fff;color:var(--ink);
-  }
-  .field input:focus,.field select:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
-  
-  .checkline{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink);margin-bottom:12px; font-weight:600;}
-  .checkline input{width:15px;height:15px;accent-color:var(--accent);}
-
-  .subpanel{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
-  .subpanel.open{display:block;}
-
-  .workspace-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
-  .workspace-head h2{font-family:var(--font-display);font-size:17px;margin:0;color:var(--accent-dark);}
-  .workspace-head .count{font-family:var(--font-mono);font-size:12px;color:var(--muted);}
-
-  .empty-state{
-    border:1.5px dashed var(--line);border-radius:var(--radius);padding:60px 20px;
-    text-align:center;color:var(--muted);background:var(--panel);
-  }
-  .empty-state .stamp-mark{width:64px;height:64px;margin:0 auto 14px;opacity:.5;}
-  .empty-state p{margin:4px 0;font-size:13.5px;}
-
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;}
-  .thumb{
-    background:var(--panel);border:1px solid var(--line);border-radius:9px;
-    padding:8px;display:flex;flex-direction:column;gap:6px;user-select:none;
-    transition:box-shadow .15s;
-  }
-  .thumb.dragging{opacity:.35;box-shadow:0 8px 24px rgba(0,0,0,0.15);}
-  .thumb.drag-over{outline:2px dashed var(--accent);outline-offset:2px;}
-  .thumb:hover{box-shadow:0 4px 14px rgba(30,42,34,.10);}
-  .thumb-frame{
-    position:relative;width:100%;aspect-ratio:3/4;border-radius:6px;overflow:hidden;
-    background:repeating-linear-gradient(45deg,#F1F2EC,#F1F2EC 8px,#EAEBE3 8px,#EAEBE3 16px);
-    display:flex;align-items:center;justify-content:center;border:1px solid var(--line-soft);
-    cursor:zoom-in;
-  }
-  .thumb-img{max-width:92%;max-height:92%;object-fit:contain;transition:transform .18s;display:block;box-shadow:0 1px 4px rgba(0,0,0,.15);}
-  .thumb-controls{display:flex;align-items:center;justify-content:space-between;gap:4px;}
-  .thumb-controls .grp{display:flex;gap:2px;}
-  .thumb-controls button{
-    background:var(--bg-soft);border:1px solid var(--line-soft);border-radius:6px;
-    width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;
-    font-size:13px;color:var(--ink);
-  }
-  .thumb-controls button:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);}
-  .thumb-controls button.danger:hover{background:var(--stamp-soft);border-color:var(--stamp);color:var(--stamp);}
-  .thumb-controls .handle{cursor:grab;color:var(--muted);touch-action:none;}
-  .thumb-meta{display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:10.5px;color:var(--muted);padding:0 1px;}
-  .thumb-meta .pos{background:var(--accent);color:#fff;border-radius:999px;padding:1px 7px;font-weight:600;}
-  .thumb-meta .fname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;}
-
-  /* Zoom Modal */
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(20,26,20,.72);backdrop-filter:blur(2px);
-    display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
-  }
-  .modal-overlay.open{display:flex;}
-  .modal{background:var(--panel);border-radius:14px;max-width:min(920px,94vw);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;}
-  .modal-top{display:flex;align-items:center;justify-content:flex-end;padding:12px 16px;border-bottom:1px solid var(--line);}
-  .modal-body{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;background:var(--bg-soft);padding:20px;position:relative;}
-  .modal-body img{max-width:100%;max-height:80vh;box-shadow:0 6px 24px rgba(0,0,0,.25);background:#fff;}
-  .nav-btn{background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;width:34px;height:34px;font-size:16px;}
-  .nav-btn:hover{background:var(--accent-soft);}
-
-  footer.credit{flex:0 0 auto;text-align:center;padding:10px 0 14px;font-family:var(--font-mono);font-size:11.5px;color:var(--muted);}
-</style>
 </head>
 <body>
 
-<div class="app">
-  <div class="topbar">
-    <div class="brand">
-      <svg class="stamp-mark" viewBox="0 0 100 100">
-        <defs><path id="circlePath" d="M 50,50 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/></defs>
-        <circle cx="50" cy="50" r="46" fill="none" stroke="#2B5C4B" stroke-width="2"/>
-        <circle cx="50" cy="50" r="38" fill="none" stroke="#2B5C4B" stroke-width="1.4"/>
-        <text font-family="JetBrains Mono, monospace" font-size="9.2" font-weight="600" fill="#2B5C4B" letter-spacing="1.5">
-          <textPath href="#circlePath" startOffset="2%">SSCGRAM.COM • PDF TOOLKIT • </textPath>
-        </text>
-        <path d="M35 52 L46 63 L67 38" fill="none" stroke="#B23A2E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <div class="brand-text">
-        <h1>Image to PDF Converter</h1>
-        <p>CONVERT JPG/PNG TO PDF — SAB BROWSER MEIN</p>
-      </div>
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>Image to PDF</span>
     </div>
-    <div class="top-actions">
-      <a href="index.html" class="btn ghost">🏠 Home</a>
-      <a href="split-merge-pdftoimage.html" class="btn ghost">⚡ PDF Toolkit</a>
-      <button class="btn ghost" id="clearBtn">↺ Clear all</button>
-      <button class="btn primary" id="makeBtn" disabled>⬇ Make PDF</button>
-    </div>
+    <h1 class="page-title">Image to PDF</h1>
+    <p class="page-desc">Convert JPG, PNG, WEBP images into a PDF. All processing happens in your browser.</p>
   </div>
 
-  <div class="layout">
-    <!-- SIDEBAR -->
-    <div class="sidebar-scroll">
-      <div class="panel">
-        <h2><span class="num">1</span> Images Upload Karein</h2>
+  <div class="tool-layout">
+    <aside class="tool-panel" id="toolPanel">
+      <!-- Upload -->
+      <div class="card">
+        <div class="card-title"><span class="step-badge">1</span> Upload Images</div>
         <div class="dropzone" id="dropZone">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
-          <p>Yahan drag-drop karein ya click karein</p>
-          <span>JPG, PNG, WEBP files</span>
+          <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M12 16V4M12 4l-4 4M12 4l4 4"/>
+            <path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/>
+          </svg>
+          <p class="dropzone-title">Drop images here or click to browse</p>
+          <p class="dropzone-sub">JPG, PNG, WEBP supported</p>
         </div>
         <input type="file" id="fileInput" accept="image/*" multiple>
       </div>
 
-      <div class="panel">
-        <h2><span class="num">2</span> Page Layout</h2>
+      <!-- Page layout -->
+      <div class="card">
+        <div class="card-title"><span class="step-badge">2</span> Page Layout</div>
         <div class="field">
-          <label>Orientation</label>
+          <label class="field-label">Orientation</label>
           <select id="orientSel">
             <option value="portrait">Portrait (A4)</option>
             <option value="landscape">Landscape (A4)</option>
           </select>
         </div>
         <div class="field">
-          <label>Margin</label>
+          <label class="field-label">Margin</label>
           <select id="marginSel">
             <option value="0">No Margin</option>
-            <option value="8" selected>Small Margin</option>
-            <option value="20">Large Margin</option>
+            <option value="8" selected>Small (8 mm)</option>
+            <option value="20">Large (20 mm)</option>
           </select>
         </div>
       </div>
 
-      <div class="panel">
-        <label class="checkline"><input type="checkbox" id="headerToggle"> Add Header</label>
-        <div class="subpanel" id="headerPanel">
-          <div class="field">
-            <label>Header Text</label>
-            <input type="text" id="headerText" placeholder="e.g. SSCGRAM.COM">
-          </div>
-          <div class="field">
-            <div class="row">
-              <div style="flex:1;"><label>Size</label><input type="number" id="headerFontSize" value="12"></div>
-              <div style="flex:1;"><label>Align</label><select id="headerAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></div>
-            </div>
+      <!-- Header -->
+      <div class="card">
+        <label class="checkbox-line"><input type="checkbox" id="headerToggle"> Add Header</label>
+        <div class="collapsible" id="headerPanel">
+          <div class="field"><label class="field-label">Header Text</label><input type="text" id="headerText" placeholder="e.g. SSCGRAM.COM"></div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Size (pt)</label><input type="number" id="headerFontSize" value="12" min="6" max="48"></div>
+            <div class="field"><label class="field-label">Align</label><select id="headerAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></div>
           </div>
         </div>
       </div>
 
-      <div class="panel">
-        <label class="checkline"><input type="checkbox" id="footerToggle"> Add Footer</label>
-        <div class="subpanel" id="footerPanel">
-          <div class="field">
-            <label>Footer Text</label>
-            <input type="text" id="footerText" placeholder="e.g. www.sscgram.com">
-          </div>
-          <div class="field">
-            <div class="row">
-              <div style="flex:1;"><label>Size</label><input type="number" id="footerFontSize" value="10"></div>
-              <div style="flex:1;"><label>Align</label><select id="footerAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></div>
-            </div>
+      <!-- Footer -->
+      <div class="card">
+        <label class="checkbox-line"><input type="checkbox" id="footerToggle"> Add Footer</label>
+        <div class="collapsible" id="footerPanel">
+          <div class="field"><label class="field-label">Footer Text</label><input type="text" id="footerText" placeholder="e.g. www.sscgram.com"></div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Size (pt)</label><input type="number" id="footerFontSize" value="10" min="6" max="48"></div>
+            <div class="field"><label class="field-label">Align</label><select id="footerAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></div>
           </div>
         </div>
       </div>
 
-      <div class="panel">
-        <label class="checkline"><input type="checkbox" id="watermarkToggle"> Add Watermark</label>
-        <div class="subpanel" id="watermarkPanel">
-          <div class="field">
-            <label>Watermark Text</label>
-            <input type="text" id="wmText" placeholder="e.g. SSCGRAM">
-          </div>
-          <div class="field">
-            <div class="row">
-              <div style="flex:1;"><label>Size</label><input type="number" id="wmFontSize" value="60"></div>
-              <div style="flex:1;"><label>Rotation (°)</label><input type="number" id="wmRotation" value="-45"></div>
-              <div style="flex:1;"><label>Opacity (%)</label><input type="number" id="wmOpacity" value="15" min="5" max="100"></div>
-            </div>
+      <!-- Watermark -->
+      <div class="card">
+        <label class="checkbox-line"><input type="checkbox" id="watermarkToggle"> Add Watermark</label>
+        <div class="collapsible" id="watermarkPanel">
+          <div class="field"><label class="field-label">Watermark Text</label><input type="text" id="wmText" placeholder="e.g. CONFIDENTIAL"></div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Size</label><input type="number" id="wmFontSize" value="60" min="10" max="200"></div>
+            <div class="field"><label class="field-label">Rotation (deg)</label><input type="number" id="wmRotation" value="-45" min="-180" max="180"></div>
+            <div class="field"><label class="field-label">Opacity (%)</label><input type="number" id="wmOpacity" value="15" min="5" max="100"></div>
           </div>
         </div>
       </div>
 
-      <div class="panel">
-        <h2><span class="num">6</span> File Name</h2>
-        <div class="field">
-          <label>PDF Title</label>
-          <input type="text" id="fileTitle" placeholder="e.g. My Documents">
-          <p class="hint" style="margin-top:6px;">"convert.. by sscgram" automatically add hoga.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- WORKSPACE -->
-    <div class="workspace-scroll">
-      <div class="workspace-head">
-        <h2>Images — drag karke order badlein, rotate ya remove karein</h2>
-        <span class="count" id="countLabel">0 images</span>
+      <!-- Output filename -->
+      <div class="card">
+        <div class="card-title"><span class="step-badge">6</span> Output File Name</div>
+        <div class="field"><label class="field-label">PDF Title</label><input type="text" id="fileTitle" placeholder="e.g. My Document"></div>
       </div>
 
+      <!-- Actions -->
+      <div class="card" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" id="clearBtn">Clear All</button>
+        <button class="btn btn-primary btn-sm" id="makeBtn" disabled style="flex:1;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 16V4M12 16l-4-4M12 16l4-4"/><path d="M4 20h16"/></svg>
+          Download PDF
+        </button>
+      </div>
+    </aside>
+
+    <main class="tool-preview">
+      <div class="preview-header">
+        <span class="preview-header-title">Preview</span>
+        <span class="preview-count" id="countLabel">0 images</span>
+      </div>
       <div class="empty-state" id="emptyHint">
-        <svg class="stamp-mark" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="46" fill="none" stroke="#647063" stroke-width="2"/>
-          <path d="M35 52 L46 63 L67 38" fill="none" stroke="#647063" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <p><strong>Abhi koi image add nahi hui hai.</strong></p>
-        <p>Left panel se upload karein — preview yahan dikhega.</p>
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <p class="empty-state-title">No images added yet</p>
+        <p class="empty-state-desc">Upload images from the left panel. Preview will appear here.</p>
+      </div>
+      <div class="thumb-grid" id="imageList"></div>
+    </main>
+  </div>
+</div>
+
+<!-- Lightbox modal with Before/After -->
+<div class="modal-overlay" id="lightbox">
+  <div class="modal" style="max-width:920px; width:94vw;">
+    <div class="modal-header" style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border);">
+      <span class="modal-info" id="lbInfo" style="font-family:var(--font-mono); font-size:12px; color:var(--text-muted);">Image 1 / 1</span>
+      
+      <!-- Before / After Toggle -->
+      <div class="preview-toggle" style="display:flex; gap:4px; background:var(--bg); padding:4px; border-radius:8px; border:1px solid var(--border);">
+        <button class="btn btn-sm" id="btnBefore" style="background:var(--accent); color:#fff; border:none; padding:4px 12px; border-radius:6px; font-weight:600;">Before</button>
+        <button class="btn btn-sm" id="btnAfter" style="background:transparent; color:var(--text-muted); border:none; padding:4px 12px; border-radius:6px; font-weight:600;">After</button>
       </div>
 
-      <div class="grid" id="imageList"></div>
+      <button class="btn btn-ghost btn-sm" id="lbClose">Close</button>
     </div>
-  </div>
-
-  <footer class="credit">Made for offline use • no data leaves your device</footer>
-</div>
-
-<!-- Lightbox Modal -->
-<div class="modal-overlay" id="lightbox">
-  <div class="modal">
-    <div class="modal-top">
-      <button class="btn ghost sm" id="lbClose">✕ Close</button>
-    </div>
-    <div class="modal-body">
-      <button class="nav-btn" id="lbPrev" style="position:absolute;left:14px;">‹</button>
-      <img id="lbImg" src="" alt="">
-      <button class="nav-btn" id="lbNext" style="position:absolute;right:14px;">›</button>
+    <div class="modal-body" style="padding:20px; background:var(--bg); display:flex; align-items:center; justify-content:center; position:relative; overflow:auto;">
+      <button class="modal-nav-btn prev" id="lbPrev" style="position:absolute; left:14px;">&#8249;</button>
+      <canvas id="lbCanvas" style="max-width:100%; max-height:80vh; object-fit:contain; box-shadow:0 4px 12px rgba(0,0,0,0.15); background:#fff;"></canvas>
+      <button class="modal-nav-btn next" id="lbNext" style="position:absolute; right:14px;">&#8250;</button>
     </div>
   </div>
 </div>
 
+<script src="../assets/js/common.js"></script>
+<script src="../assets/js/ui.js"></script>
 <script>
+initUI({ toolName: 'Image to PDF', rootPath: '../' });
 const { jsPDF } = window.jspdf;
 
 let images = [];
-const fileInput = document.getElementById('fileInput');
-const dropZone = document.getElementById('dropZone');
-const imageList = document.getElementById('imageList');
-const emptyHint = document.getElementById('emptyHint');
-const makeBtn = document.getElementById('makeBtn');
-const clearBtn = document.getElementById('clearBtn');
-const countLabel = document.getElementById('countLabel');
+const fileInput = document.getElementById('fileInput'), dropZone = document.getElementById('dropZone');
+const imageList = document.getElementById('imageList'), emptyHint = document.getElementById('emptyHint');
+const makeBtn = document.getElementById('makeBtn'), clearBtn = document.getElementById('clearBtn'), countLabel = document.getElementById('countLabel');
+
+['header', 'footer', 'watermark'].forEach(key => {
+  document.getElementById(key + 'Toggle').addEventListener('change', e => {
+    document.getElementById(key + 'Panel').classList.toggle('open', e.target.checked);
+  });
+});
 
 dropZone.addEventListener('click', () => fileInput.click());
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); addFiles(e.dataTransfer.files); });
-fileInput.addEventListener('change', e => addFiles(e.target.files));
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); addFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => { addFiles(e.target.files); fileInput.value = ''; });
 
-// EXIF orientation helpers
-function getExifOrientation(file){
-  return new Promise((resolve) => {
-    if (!file.type || !file.type.includes('jpeg')) { resolve(1); return; }
+function getExifOrientation(file) {
+  return new Promise(resolve => {
+    if (!file.type.includes('jpeg')) { resolve(1); return; }
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const view = new DataView(e.target.result);
         if (view.getUint16(0, false) !== 0xFFD8) { resolve(1); return; }
-        const length = view.byteLength;
         let offset = 2;
-        while (offset < length) {
-          const marker = view.getUint16(offset, false);
-          offset += 2;
+        while (offset < view.byteLength) {
+          const marker = view.getUint16(offset, false); offset += 2;
           if (marker === 0xFFE1) {
-            const tiffOffset = offset + 8;
-            const little = view.getUint16(tiffOffset, false) === 0x4949;
-            const firstIFDOffset = view.getUint32(tiffOffset + 4, little);
-            let dirOffset = tiffOffset + firstIFDOffset;
-            const tags = view.getUint16(dirOffset, little);
-            dirOffset += 2;
-            for (let i = 0; i < tags; i++) {
-              if (view.getUint16(dirOffset + i * 12, little) === 0x0112) {
-                resolve(view.getUint16(dirOffset + i * 12 + 8, little)); return;
-              }
-            }
+            const tiffOff = offset + 8, little = view.getUint16(tiffOff, false) === 0x4949;
+            let dirOff = tiffOff + view.getUint32(tiffOff + 4, little), tags = view.getUint16(dirOff, little); dirOff += 2;
+            for (let i = 0; i < tags; i++) if (view.getUint16(dirOff + i * 12, little) === 0x0112) { resolve(view.getUint16(dirOff + i * 12 + 8, little)); return; }
             resolve(1); return;
-          } else if ((marker & 0xFF00) !== 0xFF00) { break; } 
-          else { offset += view.getUint16(offset, false); }
-        }
-        resolve(1);
-      } catch (err) { resolve(1); }
+          } else if ((marker & 0xFF00) !== 0xFF00) break;
+          else offset += view.getUint16(offset, false);
+        } resolve(1);
+      } catch { resolve(1); }
     };
-    reader.onerror = () => resolve(1);
-    reader.readAsArrayBuffer(file.slice(0, 128 * 1024));
+    reader.onerror = () => resolve(1); reader.readAsArrayBuffer(file.slice(0, 128 * 1024));
   });
 }
 
-function normalizeImageOrientation(file){
-  return new Promise(async (resolve) => {
-    const orientation = await getExifOrientation(file);
-    const objectUrl = URL.createObjectURL(file);
-    const img = new Image();
+function normalizeOrientation(file) {
+  return new Promise(async resolve => {
+    const orientation = await getExifOrientation(file), url = URL.createObjectURL(file), img = new Image();
     img.onload = () => {
       const iw = img.naturalWidth, ih = img.naturalHeight;
-      if (orientation <= 1) { resolve({ dataUrl: objectUrl, w: iw, h: ih, type: file.type.includes('png') ? 'PNG' : 'JPEG' }); return; }
-      const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-      if (orientation >= 5 && orientation <= 8) { canvas.width = ih; canvas.height = iw; } 
-      else { canvas.width = iw; canvas.height = ih; }
-      switch (orientation) {
-        case 2: ctx.transform(-1, 0, 0, 1, iw, 0); break;
-        case 3: ctx.transform(-1, 0, 0, -1, iw, ih); break;
-        case 4: ctx.transform(1, 0, 0, -1, 0, ih); break;
-        case 5: ctx.transform(0, 1, 1, 0, 0, 0); break;
-        case 6: ctx.transform(0, 1, -1, 0, ih, 0); break;
-        case 7: ctx.transform(0, -1, -1, 0, ih, iw); break;
-        case 8: ctx.transform(0, -1, 1, 0, 0, iw); break;
-      }
-      ctx.drawImage(img, 0, 0); URL.revokeObjectURL(objectUrl);
-      resolve({ dataUrl: canvas.toDataURL('image/jpeg', 0.95), w: canvas.width, h: canvas.height, type: 'JPEG' });
+      if (orientation <= 1) { resolve({ url, w: iw, h: ih, type: file.type.includes('png') ? 'PNG' : 'JPEG' }); return; }
+      const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+      if (orientation >= 5) { canvas.width = ih; canvas.height = iw; } else { canvas.width = iw; canvas.height = ih; }
+      const t = { 2:[-1,0,0,1,iw,0], 3:[-1,0,0,-1,iw,ih], 4:[1,0,0,-1,0,ih], 5:[0,1,1,0,0,0], 6:[0,1,-1,0,ih,0], 7:[0,-1,-1,0,ih,iw], 8:[0,-1,1,0,0,iw] };
+      if (t[orientation]) ctx.transform(...t[orientation]);
+      ctx.drawImage(img, 0, 0); URL.revokeObjectURL(url);
+      resolve({ url: canvas.toDataURL('image/jpeg', 0.95), w: canvas.width, h: canvas.height, type: 'JPEG' });
     };
-    img.onerror = () => resolve({ dataUrl: objectUrl, w: 0, h: 0, type: file.type.includes('png') ? 'PNG' : 'JPEG' });
-    img.src = objectUrl;
+    img.onerror = () => resolve({ url, w: 0, h: 0, type: 'JPEG' }); img.src = url;
   });
 }
 
-function rotateImageData(srcUrl, w, h, degrees){
+function rotateImageData(srcUrl, w, h, deg) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-      const norm = ((degrees % 360) + 360) % 360;
-      if (norm === 90 || norm === 270) { canvas.width = h; canvas.height = w; } 
-      else { canvas.width = w; canvas.height = h; }
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate((norm * Math.PI) / 180);
-      ctx.drawImage(img, -w / 2, -h / 2);
-      resolve({ dataUrl: canvas.toDataURL('image/jpeg', 0.95), w: canvas.width, h: canvas.height });
-    };
-    img.onerror = reject; img.src = srcUrl;
+      const norm = ((deg % 360) + 360) % 360, canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+      if (norm === 90 || norm === 270) { canvas.width = h; canvas.height = w; } else { canvas.width = w; canvas.height = h; }
+      ctx.translate(canvas.width / 2, canvas.height / 2); ctx.rotate(norm * Math.PI / 180); ctx.drawImage(img, -w / 2, -h / 2);
+      resolve({ url: canvas.toDataURL('image/jpeg', 0.95), w: canvas.width, h: canvas.height });
+    }; img.onerror = reject; img.src = srcUrl;
   });
 }
 
-async function rotateImage(id, degrees){
+async function rotateImage(id, deg) {
   const idx = images.findIndex(i => i.id === id);
   if (idx === -1) return;
-  const img = images[idx];
-  const rotated = await rotateImageData(img.url, img.w, img.h, degrees);
-  images[idx] = { ...img, url: rotated.dataUrl, w: rotated.w, h: rotated.h, pdfType: 'JPEG' };
-  render();
-  if (lightbox.classList.contains('open') && lbIndex === idx) updateLightbox();
+  const img = images[idx], r = await rotateImageData(img.url, img.w, img.h, deg);
+  images[idx] = { ...img, url: r.url, w: r.w, h: r.h, pdfType: 'JPEG' };
+  render(); if (document.getElementById('lightbox').classList.contains('open') && lbIndex === idx) updateLightbox();
 }
 
-async function addFiles(fileListRaw){
-  const files = Array.from(fileListRaw).filter(f => f.type.startsWith('image/'));
+async function addFiles(fileList) {
+  const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
   for (const file of files) {
-    const id = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-    const normalized = await normalizeImageOrientation(file);
-    images.push({ id, file, url: normalized.dataUrl, w: normalized.w, h: normalized.h, pdfType: normalized.type });
-    render(); 
+    const id = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), norm = await normalizeOrientation(file);
+    images.push({ id, file, url: norm.url, w: norm.w, h: norm.h, pdfType: norm.type });
+    render();
   }
-  fileInput.value = '';
 }
 
-function render(){
-  imageList.innerHTML = '';
-  emptyHint.style.display = images.length ? 'none' : 'block';
-  images.forEach((img, idx) => {
-    const div = document.createElement('div');
-    div.className = 'thumb';
-    div.dataset.id = img.id;
-    div.innerHTML = `
-      <div class="thumb-frame">
-        <img class="thumb-img" src="${img.url}" alt="">
-      </div>
-      <div class="thumb-controls">
-        <span class="handle drag-handle" title="Drag to reorder">⠿</span>
-        <div class="grp">
-          <button class="rot-left" title="Left rotate">⟲</button>
-          <button class="rot-right" title="Right rotate">⟳</button>
-          <button class="rm danger" title="Remove">✕</button>
-        </div>
-      </div>
-      <div class="thumb-meta">
-        <span class="pos">#${idx+1}</span>
-        <span class="fname" title="${img.file.name}">${img.file.name}</span>
-      </div>
-    `;
-    div.querySelector('.thumb-frame').addEventListener('click', (e) => { e.stopPropagation(); openLightbox(idx); });
-    div.querySelector('.rm').addEventListener('click', (e) => { e.stopPropagation(); images = images.filter(i => i.id !== img.id); render(); });
-    div.querySelector('.rot-left').addEventListener('click', async (e) => { e.stopPropagation(); await rotateImage(img.id, -90); });
-    div.querySelector('.rot-right').addEventListener('click', async (e) => { e.stopPropagation(); await rotateImage(img.id, 90); });
-    attachDragHandle(div, div.querySelector('.drag-handle'));
-    imageList.appendChild(div);
-  });
-  countLabel.textContent = images.length + (images.length === 1 ? ' image' : ' images');
+function render() {
+  imageList.innerHTML = ''; emptyHint.style.display = images.length ? 'none' : 'block';
+  imageList.style.display = images.length ? 'grid' : 'none'; countLabel.textContent = images.length + (images.length === 1 ? ' image' : ' images');
   makeBtn.disabled = images.length === 0;
+  images.forEach((img, idx) => {
+    const card = document.createElement('div'); card.className = 'thumb-card'; card.dataset.id = img.id;
+    card.innerHTML = `
+      <div class="thumb-frame"><img class="thumb-img" src="${img.url}" alt=""></div>
+      <div class="thumb-actions"><span class="thumb-btn thumb-drag-handle" title="Drag to reorder">&#8942;</span><div class="thumb-actions-group"><button class="thumb-btn rot-left" title="Rotate left">&#8634;</button><button class="thumb-btn rot-right" title="Rotate right">&#8635;</button><button class="thumb-btn danger rm" title="Remove">&#10005;</button></div></div>
+      <div class="thumb-meta"><span class="thumb-pos">#${idx + 1}</span><span class="thumb-name" title="${img.file.name}">${img.file.name}</span></div>`;
+    card.querySelector('.thumb-frame').addEventListener('click', e => { e.stopPropagation(); openLightbox(idx); });
+    card.querySelector('.rm').addEventListener('click', e => { e.stopPropagation(); images = images.filter(i => i.id !== img.id); render(); });
+    card.querySelector('.rot-left').addEventListener('click', async e => { e.stopPropagation(); await rotateImage(img.id, -90); });
+    card.querySelector('.rot-right').addEventListener('click', async e => { e.stopPropagation(); await rotateImage(img.id, 90); });
+    attachDrag(card, card.querySelector('.thumb-drag-handle')); imageList.appendChild(card);
+  });
 }
 
-// Drag logic
 let dragState = null;
-function getThumbUnderPoint(x, y){
-  const el = document.elementFromPoint(x, y);
-  return el ? el.closest('.thumb') : null;
-}
-function attachDragHandle(div, handle){
+function attachDrag(card, handle) {
   if (!handle) return;
-  handle.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    try { handle.setPointerCapture(e.pointerId); } catch (err) {}
-    div.classList.add('dragging');
-    dragState = { pointerId: e.pointerId, div };
-  });
+  handle.addEventListener('pointerdown', e => { e.preventDefault(); try { handle.setPointerCapture(e.pointerId); } catch {} card.classList.add('dragging'); dragState = { pointerId: e.pointerId, card }; });
 }
 document.addEventListener('pointermove', e => {
   if (!dragState || e.pointerId !== dragState.pointerId) return;
-  document.querySelectorAll('.thumb.drag-over').forEach(el => el.classList.remove('drag-over'));
-  const targetDiv = getThumbUnderPoint(e.clientX, e.clientY);
-  if (!targetDiv || targetDiv === dragState.div) return;
-  targetDiv.classList.add('drag-over');
-  const rect = targetDiv.getBoundingClientRect();
-  const after = (e.clientX - rect.left) > rect.width / 2;
-  targetDiv.parentNode.insertBefore(dragState.div, after ? targetDiv.nextSibling : targetDiv);
+  document.querySelectorAll('.thumb-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+  const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.thumb-card');
+  if (!target || target === dragState.card) return; target.classList.add('drag-over');
+  const rect = target.getBoundingClientRect(), after = (e.clientX - rect.left) > rect.width / 2;
+  target.parentNode.insertBefore(dragState.card, after ? target.nextSibling : target);
 });
 document.addEventListener('pointerup', e => {
   if (!dragState || e.pointerId !== dragState.pointerId) return;
-  dragState.div.classList.remove('dragging');
-  document.querySelectorAll('.thumb.drag-over').forEach(el => el.classList.remove('drag-over'));
-  const newOrder = Array.from(imageList.children).map(d => d.dataset.id);
-  images = newOrder.map(id => images.find(i => i.id === id));
+  dragState.card.classList.remove('dragging'); document.querySelectorAll('.thumb-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+  const newOrder = Array.from(imageList.children).map(d => d.dataset.id); images = newOrder.map(id => images.find(i => i.id === id));
   dragState = null; render();
 });
 
 clearBtn.addEventListener('click', () => { images = []; render(); });
 
-['headerToggle', 'footerToggle', 'watermarkToggle'].forEach(id => {
-  document.getElementById(id).addEventListener('change', e => {
-    document.getElementById(id.replace('Toggle', 'Panel')).classList.toggle('open', e.target.checked);
-  });
-});
-
 makeBtn.addEventListener('click', async () => {
-  if (!images.length) return;
-  makeBtn.disabled = true; makeBtn.textContent = 'Processing...';
+  if (!images.length) return; makeBtn.disabled = true; makeBtn.textContent = 'Generating...'; Busy.show('Building PDF...');
+  try {
+    const orient = document.getElementById('orientSel').value, margin = parseFloat(document.getElementById('marginSel').value);
+    const doc = new jsPDF({ orientation: orient, unit: 'mm', format: 'a4' }), pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight();
+    const useHeader = document.getElementById('headerToggle').checked, useFooter = document.getElementById('footerToggle').checked, useWatermark = document.getElementById('watermarkToggle').checked;
+    const hRes = useHeader ? 15 : 0, fRes = useFooter ? 15 : 0, availW = pageW - margin * 2, availH = pageH - margin * 2 - hRes - fRes;
 
-  const orient = document.getElementById('orientSel').value;
-  const margin = parseFloat(document.getElementById('marginSel').value);
-  const doc = new jsPDF({ orientation: orient, unit: 'mm', format: 'a4' });
-  const pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight();
-  
-  const useHeader = document.getElementById('headerToggle').checked;
-  const useFooter = document.getElementById('footerToggle').checked;
-  const useWatermark = document.getElementById('watermarkToggle').checked;
-  
-  const hRes = useHeader ? 15 : 0; const fRes = useFooter ? 15 : 0;
-  const availW = pageW - margin * 2, availH = pageH - margin * 2 - hRes - fRes;
-
-  function drawOverlays(){
-    if (useHeader) {
-      const text = document.getElementById('headerText').value;
-      if (text) {
-        const align = document.getElementById('headerAlign').value;
-        doc.setFontSize(parseFloat(document.getElementById('headerFontSize').value) || 12);
-        doc.setTextColor(40, 40, 40);
-        let x = pageW / 2; if (align === 'left') x = margin; if (align === 'right') x = pageW - margin;
-        doc.text(text, x, 10, { align });
-      }
+    function drawOverlays() {
+      if (useHeader) { const text = document.getElementById('headerText').value; if (text) { const align = document.getElementById('headerAlign').value; doc.setFontSize(parseFloat(document.getElementById('headerFontSize').value) || 12); doc.setTextColor(40, 40, 40); let x = pageW / 2; if (align === 'left') x = margin; if (align === 'right') x = pageW - margin; doc.text(text, x, 10, { align }); } }
+      if (useFooter) { const text = document.getElementById('footerText').value; if (text) { const align = document.getElementById('footerAlign').value; doc.setFontSize(parseFloat(document.getElementById('footerFontSize').value) || 10); doc.setTextColor(40, 40, 40); let x = pageW / 2; if (align === 'left') x = margin; if (align === 'right') x = pageW - margin; doc.text(text, x, pageH - 10, { align }); } }
+      if (useWatermark) { const text = document.getElementById('wmText').value; if (text) { const opacity = (parseFloat(document.getElementById('wmOpacity').value) || 15) / 100; doc.saveGraphicsState(); if (doc.GState) doc.setGState(new doc.GState({ opacity })); doc.setFontSize(parseFloat(document.getElementById('wmFontSize').value) || 60); doc.setTextColor(120, 120, 120); doc.text(text, pageW / 2, pageH / 2, { align: 'center', angle: parseFloat(document.getElementById('wmRotation').value) || 0 }); doc.restoreGraphicsState(); } }
     }
-    if (useFooter) {
-      const text = document.getElementById('footerText').value;
-      if (text) {
-        const align = document.getElementById('footerAlign').value;
-        doc.setFontSize(parseFloat(document.getElementById('footerFontSize').value) || 10);
-        doc.setTextColor(40, 40, 40);
-        let x = pageW / 2; if (align === 'left') x = margin; if (align === 'right') x = pageW - margin;
-        doc.text(text, x, pageH - 10, { align });
-      }
-    }
-    if (useWatermark) {
-      const text = document.getElementById('wmText').value;
-      if (text) {
-        const opacity = (parseFloat(document.getElementById('wmOpacity').value) || 15) / 100;
-        doc.saveGraphicsState(); if (doc.GState) doc.setGState(new doc.GState({ opacity }));
-        doc.setFontSize(parseFloat(document.getElementById('wmFontSize').value) || 60);
-        doc.setTextColor(120, 120, 120);
-        doc.text(text, pageW / 2, pageH / 2, { align: 'center', angle: parseFloat(document.getElementById('wmRotation').value) || 0 });
-        doc.restoreGraphicsState();
-      }
-    }
-  }
 
-  for (let i = 0; i < images.length; i++) {
-    const img = images[i];
-    if (i > 0) doc.addPage('a4', orient);
-    const scale = Math.min(availW / (img.w||1000), availH / (img.h||1000));
-    const drawW = (img.w||1000) * scale, drawH = (img.h||1000) * scale;
-    const x = margin + (availW - drawW) / 2, y = margin + hRes + (availH - drawH) / 2;
-    try { doc.addImage(img.url, img.pdfType || 'JPEG', x, y, drawW, drawH, undefined, 'FAST'); } catch(e){}
-    drawOverlays();
-  }
-
-  const baseTitle = document.getElementById('fileTitle').value.trim() || 'Document';
-  doc.save(baseTitle.replace(/[\\/:*?"<>|]/g, '') + ' convert.. by sscgram.pdf');
-  makeBtn.disabled = false; makeBtn.textContent = '⬇ Make PDF';
+    for (let i = 0; i < images.length; i++) {
+      const img = images[i]; if (i > 0) doc.addPage('a4', orient);
+      const scale = Math.min(availW / (img.w || 1000), availH / (img.h || 1000)), drawW = (img.w || 1000) * scale, drawH = (img.h || 1000) * scale;
+      const x = margin + (availW - drawW) / 2, y = margin + hRes + (availH - drawH) / 2;
+      try { doc.addImage(img.url, img.pdfType || 'JPEG', x, y, drawW, drawH, undefined, 'FAST'); } catch {} drawOverlays();
+    }
+    const title = (document.getElementById('fileTitle').value.trim() || 'Document').replace(/[\/:*?"<>|]/g, '');
+    doc.save(title + ' — sscgram.pdf'); Toast.success('PDF downloaded successfully.');
+  } catch (err) { console.error(err); Toast.error('Failed to generate PDF. Please try again.'); }
+  Busy.hide(); makeBtn.disabled = false; makeBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 16V4M12 16l-4-4M12 16l4-4"/><path d="M4 20h16"/></svg> Download PDF`;
 });
 
-// Lightbox
-const lightbox = document.getElementById('lightbox'), lbImg = document.getElementById('lbImg');
 let lbIndex = 0;
-function openLightbox(idx){ if (!images.length) return; lbIndex = idx; updateLightbox(); lightbox.classList.add('open'); }
-function updateLightbox(){ const img = images[lbIndex]; if (img) lbImg.src = img.url; }
+let previewMode = 'before';
+const lightbox = document.getElementById('lightbox');
+const lbCanvas = document.getElementById('lbCanvas');
+const lbInfo = document.getElementById('lbInfo');
+
+document.getElementById('btnBefore').addEventListener('click', e => { 
+  previewMode = 'before'; 
+  e.target.style.background = 'var(--accent)'; e.target.style.color = '#fff'; e.target.classList.remove('ghost');
+  document.getElementById('btnAfter').style.background = 'transparent'; document.getElementById('btnAfter').style.color = 'var(--text-muted)'; document.getElementById('btnAfter').classList.add('ghost');
+  updateLightbox();
+});
+document.getElementById('btnAfter').addEventListener('click', e => { 
+  previewMode = 'after'; 
+  e.target.style.background = 'var(--accent)'; e.target.style.color = '#fff'; e.target.classList.remove('ghost');
+  document.getElementById('btnBefore').style.background = 'transparent'; document.getElementById('btnBefore').style.color = 'var(--text-muted)'; document.getElementById('btnBefore').classList.add('ghost');
+  updateLightbox();
+});
+
+function openLightbox(idx) {
+  if (!images.length) return;
+  lbIndex = idx;
+  updateLightbox();
+  lightbox.classList.add('open');
+}
+
+function updateLightbox() {
+  const img = images[lbIndex];
+  if (!img) return;
+  lbInfo.textContent = `Image ${lbIndex + 1} / ${images.length} — ${img.file.name}`;
+  
+  const ctx = lbCanvas.getContext('2d');
+  const imageObj = new Image();
+  imageObj.onload = () => {
+      if (previewMode === 'before') {
+          lbCanvas.width = imageObj.width;
+          lbCanvas.height = imageObj.height;
+          ctx.drawImage(imageObj, 0, 0);
+      } else {
+          // After Mode (Simulate PDF layout)
+          const orient  = document.getElementById('orientSel').value;
+          const marginMM  = parseFloat(document.getElementById('marginSel').value);
+          const a4W = orient === 'portrait' ? 210 : 297;
+          const a4H = orient === 'portrait' ? 297 : 210;
+          const scale = 3; // internal render scale
+          lbCanvas.width = a4W * scale;
+          lbCanvas.height = a4H * scale;
+          
+          // White paper
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, lbCanvas.width, lbCanvas.height);
+          
+          const margin = marginMM * scale;
+          const useHeader = document.getElementById('headerToggle').checked;
+          const useFooter = document.getElementById('footerToggle').checked;
+          const hRes = useHeader ? 15 * scale : 0;
+          const fRes = useFooter ? 15 * scale : 0;
+          
+          const availW = lbCanvas.width - margin * 2;
+          const availH = lbCanvas.height - margin * 2 - hRes - fRes;
+          
+          const imgRatio = imageObj.width / imageObj.height;
+          const availRatio = availW / availH;
+          
+          let drawW, drawH;
+          if (imgRatio > availRatio) {
+              drawW = availW; drawH = availW / imgRatio;
+          } else {
+              drawH = availH; drawW = availH * imgRatio;
+          }
+          const x = margin + (availW - drawW) / 2;
+          const y = margin + hRes + (availH - drawH) / 2;
+          ctx.drawImage(imageObj, x, y, drawW, drawH);
+          
+          ctx.fillStyle = '#282828';
+          if (useHeader) {
+              const text = document.getElementById('headerText').value;
+              if (text) {
+                  const align = document.getElementById('headerAlign').value;
+                  const fSize = (parseFloat(document.getElementById('headerFontSize').value) || 12) * scale * 0.35;
+                  ctx.font = `${fSize}px sans-serif`;
+                  let tx = lbCanvas.width / 2;
+                  if (align === 'left') { tx = margin; ctx.textAlign = 'left'; }
+                  else if (align === 'right') { tx = lbCanvas.width - margin; ctx.textAlign = 'right'; }
+                  else ctx.textAlign = 'center';
+                  ctx.fillText(text, tx, margin + fSize);
+              }
+          }
+          if (useFooter) {
+              const text = document.getElementById('footerText').value;
+              if (text) {
+                  const align = document.getElementById('footerAlign').value;
+                  const fSize = (parseFloat(document.getElementById('footerFontSize').value) || 10) * scale * 0.35;
+                  ctx.font = `${fSize}px sans-serif`;
+                  let tx = lbCanvas.width / 2;
+                  if (align === 'left') { tx = margin; ctx.textAlign = 'left'; }
+                  else if (align === 'right') { tx = lbCanvas.width - margin; ctx.textAlign = 'right'; }
+                  else ctx.textAlign = 'center';
+                  ctx.fillText(text, tx, lbCanvas.height - margin);
+              }
+          }
+          if (document.getElementById('watermarkToggle').checked) {
+              const text = document.getElementById('wmText').value;
+              if (text) {
+                  const opacity = (parseFloat(document.getElementById('wmOpacity').value) || 15) / 100;
+                  const fSize = (parseFloat(document.getElementById('wmFontSize').value) || 60) * scale * 0.35;
+                  const angle = parseFloat(document.getElementById('wmRotation').value) || 0;
+                  ctx.save();
+                  ctx.globalAlpha = opacity;
+                  ctx.fillStyle = '#787878';
+                  ctx.font = `bold ${fSize}px sans-serif`;
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  ctx.translate(lbCanvas.width / 2, lbCanvas.height / 2);
+                  ctx.rotate(angle * Math.PI / 180);
+                  ctx.fillText(text, 0, 0);
+                  ctx.restore();
+              }
+          }
+      }
+  };
+  imageObj.src = img.url;
+}
+
 document.getElementById('lbClose').addEventListener('click', () => lightbox.classList.remove('open'));
+lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('open'); });
 document.getElementById('lbPrev').addEventListener('click', () => { lbIndex = (lbIndex - 1 + images.length) % images.length; updateLightbox(); });
 document.getElementById('lbNext').addEventListener('click', () => { lbIndex = (lbIndex + 1) % images.length; updateLightbox(); });
 </script>
