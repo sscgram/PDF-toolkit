@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/layout.css">
 <link rel="stylesheet" href="../assets/css/components.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZOrRnF6g0LsSZMu0rg4l83rFCIWqNjMQSPgRxIo/fHhXV3gzHhgqMp5aKDLcV3o8Xy5M7MH8NnGHZDTIkp4Q==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-2z5T6RDR3zLq2boqwAC6+BNEVDadkvSaI9FySuqDgFz0Cs23d8CDcdthcZEb1YnWwGmTfOapjEZAks0w4Rr4vw==" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -67,7 +67,7 @@
           <div class="field"><label class="field-label">Header Text</label><input type="text" id="headerText" placeholder="e.g. SSCGRAM.COM"></div>
           <div class="field-row">
             <div class="field"><label class="field-label">Size (pt)</label><input type="number" id="headerFontSize" value="12" min="6" max="48"></div>
-            <div class="field"><label class="field-label">Align</label><select id="headerAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right<[...]
+            <div class="field"><label class="field-label">Align</label><select id="headerAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></div>
           </div>
         </div>
       </div>
@@ -79,7 +79,7 @@
           <div class="field"><label class="field-label">Footer Text</label><input type="text" id="footerText" placeholder="e.g. www.sscgram.com"></div>
           <div class="field-row">
             <div class="field"><label class="field-label">Size (pt)</label><input type="number" id="footerFontSize" value="10" min="6" max="48"></div>
-            <div class="field"><label class="field-label">Align</label><select id="footerAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right<[...]
+            <div class="field"><label class="field-label">Align</label><select id="footerAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></div>
           </div>
         </div>
       </div>
@@ -252,7 +252,7 @@ function render() {
     const card = document.createElement('div'); card.className = 'thumb-card'; card.dataset.id = img.id;
     card.innerHTML = `
       <div class="thumb-frame"><img class="thumb-img" src="${img.url}" alt=""></div>
-      <div class="thumb-actions"><span class="thumb-btn thumb-drag-handle" title="Drag to reorder">&#8942;</span><div class="thumb-actions-group"><button class="thumb-btn rot-left" title="Rotate [...]
+      <div class="thumb-actions"><span class="thumb-btn thumb-drag-handle" title="Drag to reorder">&#8942;</span><div class="thumb-actions-group"><button class="thumb-btn rot-left" title="Rotate left">&#8634;</button><button class="thumb-btn rot-right" title="Rotate right">&#8635;</button><button class="thumb-btn danger rm" title="Remove">&#10005;</button></div></div>
       <div class="thumb-meta"><span class="thumb-pos">#${idx + 1}</span><span class="thumb-name" title="${img.file.name}">${img.file.name}</span></div>`;
     card.querySelector('.thumb-frame').addEventListener('click', e => { e.stopPropagation(); openLightbox(idx); });
     card.querySelector('.rm').addEventListener('click', e => { e.stopPropagation(); images = images.filter(i => i.id !== img.id); render(); });
@@ -265,7 +265,7 @@ function render() {
 let dragState = null;
 function attachDrag(card, handle) {
   if (!handle) return;
-  handle.addEventListener('pointerdown', e => { e.preventDefault(); try { handle.setPointerCapture(e.pointerId); } catch {} card.classList.add('dragging'); dragState = { pointerId: e.pointerId, c[...]
+  handle.addEventListener('pointerdown', e => { e.preventDefault(); try { handle.setPointerCapture(e.pointerId); } catch {} card.classList.add('dragging'); dragState = { pointerId: e.pointerId, card }; });
 }
 document.addEventListener('pointermove', e => {
   if (!dragState || e.pointerId !== dragState.pointerId) return;
@@ -289,13 +289,13 @@ makeBtn.addEventListener('click', async () => {
   try {
     const orient = document.getElementById('orientSel').value, margin = parseFloat(document.getElementById('marginSel').value);
     const doc = new jsPDF({ orientation: orient, unit: 'mm', format: 'a4' }), pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight();
-    const useHeader = document.getElementById('headerToggle').checked, useFooter = document.getElementById('footerToggle').checked, useWatermark = document.getElementById('watermarkToggle').check[...]
+    const useHeader = document.getElementById('headerToggle').checked, useFooter = document.getElementById('footerToggle').checked, useWatermark = document.getElementById('watermarkToggle').checked;
     const hRes = useHeader ? 15 : 0, fRes = useFooter ? 15 : 0, availW = pageW - margin * 2, availH = pageH - margin * 2 - hRes - fRes;
 
     function drawOverlays() {
-      if (useHeader) { const text = document.getElementById('headerText').value; if (text) { const align = document.getElementById('headerAlign').value; doc.setFontSize(parseFloat(document.getEle[...]
-      if (useFooter) { const text = document.getElementById('footerText').value; if (text) { const align = document.getElementById('footerAlign').value; doc.setFontSize(parseFloat(document.getEle[...]
-      if (useWatermark) { const text = document.getElementById('wmText').value; if (text) { const opacity = (parseFloat(document.getElementById('wmOpacity').value) || 15) / 100; doc.saveGraphicsS[...]
+      if (useHeader) { const text = document.getElementById('headerText').value; if (text) { const align = document.getElementById('headerAlign').value; doc.setFontSize(parseFloat(document.getElementById('headerFontSize').value) || 12); doc.setTextColor(40, 40, 40); let x = pageW / 2; if (align === 'left') x = margin; if (align === 'right') x = pageW - margin; doc.text(text, x, 10, { align }); } }
+      if (useFooter) { const text = document.getElementById('footerText').value; if (text) { const align = document.getElementById('footerAlign').value; doc.setFontSize(parseFloat(document.getElementById('footerFontSize').value) || 10); doc.setTextColor(40, 40, 40); let x = pageW / 2; if (align === 'left') x = margin; if (align === 'right') x = pageW - margin; doc.text(text, x, pageH - 10, { align }); } }
+      if (useWatermark) { const text = document.getElementById('wmText').value; if (text) { const opacity = (parseFloat(document.getElementById('wmOpacity').value) || 15) / 100; doc.saveGraphicsState(); if (doc.GState) doc.setGState(new doc.GState({ opacity })); doc.setFontSize(parseFloat(document.getElementById('wmFontSize').value) || 60); doc.setTextColor(120, 120, 120); doc.text(text, pageW / 2, pageH / 2, { align: 'center', angle: parseFloat(document.getElementById('wmRotation').value) || 0 }); doc.restoreGraphicsState(); } }
     }
 
     for (let i = 0; i < images.length; i++) {
@@ -307,7 +307,7 @@ makeBtn.addEventListener('click', async () => {
     const title = (document.getElementById('fileTitle').value.trim() || 'Document').replace(/[\/:*?"<>|]/g, '');
     doc.save(title + ' — sscgram.pdf'); Toast.success('PDF downloaded successfully.');
   } catch (err) { console.error(err); Toast.error('Failed to generate PDF. Please try again.'); }
-  Busy.hide(); makeBtn.disabled = false; makeBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 16V4M12 16l-4-4M12 [...]
+  Busy.hide(); makeBtn.disabled = false; makeBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 16V4M12 16l-4-4M12 16l4-4"/><path d="M4 20h16"/></svg> Download PDF`;
 });
 
 let lbIndex = 0;
@@ -319,13 +319,13 @@ const lbInfo = document.getElementById('lbInfo');
 document.getElementById('btnBefore').addEventListener('click', e => { 
   previewMode = 'before'; 
   e.target.style.background = 'var(--accent)'; e.target.style.color = '#fff'; e.target.classList.remove('ghost');
-  document.getElementById('btnAfter').style.background = 'transparent'; document.getElementById('btnAfter').style.color = 'var(--text-muted)'; document.getElementById('btnAfter').classList.add('g[...]
+  document.getElementById('btnAfter').style.background = 'transparent'; document.getElementById('btnAfter').style.color = 'var(--text-muted)'; document.getElementById('btnAfter').classList.add('ghost');
   updateLightbox();
 });
 document.getElementById('btnAfter').addEventListener('click', e => { 
   previewMode = 'after'; 
   e.target.style.background = 'var(--accent)'; e.target.style.color = '#fff'; e.target.classList.remove('ghost');
-  document.getElementById('btnBefore').style.background = 'transparent'; document.getElementById('btnBefore').style.color = 'var(--text-muted)'; document.getElementById('btnBefore').classList.add[...]
+  document.getElementById('btnBefore').style.background = 'transparent'; document.getElementById('btnBefore').style.color = 'var(--text-muted)'; document.getElementById('btnBefore').classList.add('ghost');
   updateLightbox();
 });
 
